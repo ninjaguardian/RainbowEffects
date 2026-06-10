@@ -1,0 +1,102 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+		<Company>$(Authors)</Company>
+		<Title>Rainbow Guard</Title>
+		<Authors>ninjaguardian (github)</Authors>
+		<Description>Change the color of the guard effect</Description>
+		<Copyright>Copyright © 2026 ninjaguardian (github), This work is dedicated to the public domain under CC0 1.0.</Copyright>
+		<PackageLicenseExpression>CC0-1.0</PackageLicenseExpression>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/ninjaguardian/RainbowGuard</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<VersionPrefix>0.0.1</VersionPrefix>
+		<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+		<FileVersion>$(VersionPrefix).0</FileVersion>
+		<PackageIcon>icon.png</PackageIcon>
+		<Platform>x64</Platform>
+		<Platforms>x64</Platforms>
+		<PlatformTarget>x64</PlatformTarget>
+		<Prefer32Bit>False</Prefer32Bit>
+		<PackageProjectUrl>https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowGuard</PackageProjectUrl>
+		<SelfContained>false</SelfContained>
+		<Optimize>True</Optimize>
+		<WarningLevel>9999</WarningLevel>
+		<IsPublishable>False</IsPublishable>
+		<Configurations>Debug;Release;ReleaseAndSave</Configurations>
+
+		<LibsDirPath>$(LIBSDIRPATH)</LibsDirPath>
+		<LibsDirPath Condition="'$(LibsDirPath)'==''">C:\Program Files (x86)\Steam\steamapps\common\RUMBLE</LibsDirPath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<StartAction>Program</StartAction>
+		<StartProgram>$(LIBSDIRPATH)\RUMBLE.exe</StartProgram>
+		<StartWorkingDirectory>$(LIBSDIRPATH)</StartWorkingDirectory>
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>full</DebugType>
+		<DefineConstants>DEBUG</DefineConstants>
+		<Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<CppConfig Condition="'$(Configuration)' == 'Debug'">Debug</CppConfig>
+		<CppConfig Condition="'$(Configuration)' != 'Debug'">Release</CppConfig>
+	</PropertyGroup>
+	
+	<Target Name="BuildNativeDLL" BeforeTargets="Build">
+		<Exec Command="cmake --fresh -S &quot;$(ProjectDir)RainbowGuardCpp&quot; -B &quot;$(ProjectDir)RainbowGuardCpp/build&quot; -A x64" />
+		<Exec Command="cmake --build &quot;$(ProjectDir)RainbowGuardCpp/build&quot; --config $(CppConfig)" />
+	</Target>
+
+	<Target Name="PostBuildCpp" AfterTargets="BuildNativeDLL" Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='ReleaseAndSave'">
+		<Exec Command="copy /Y &quot;$([System.IO.Path]::Combine('$(ProjectDir)', 'RainbowGuardCpp', 'build', '$(CppConfig)', 'RainbowGuardCpp.dll'))&quot; &quot;$([System.IO.Path]::Combine('$(LIBSDIRPATH)', 'UserLibs'))&quot;" />
+	</Target>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='ReleaseAndSave'">
+		<Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;$([System.IO.Path]::Combine('$(LIBSDIRPATH)', 'Mods'))&quot;" />
+	</Target>
+
+	<ItemGroup>
+		<None Include="..\icon.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\CHANGELOG.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\manifest.json">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\LICENSE.txt">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="0Harmony">
+			<HintPath>$(LibsDirPath)\MelonLoader\net6\0Harmony.dll</HintPath>
+		</Reference>
+		<Reference Include="MelonLoader">
+			<HintPath>$(LibsDirPath)\MelonLoader\net6\MelonLoader.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+		    <HintPath>$(LibsDirPath)\MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+</Project>
