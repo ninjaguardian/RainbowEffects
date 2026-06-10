@@ -32,7 +32,7 @@ namespace RainbowGuard
         /// <summary>
         /// Mod version.
         /// </summary>
-        public const string ModVersion = "0.0.1";
+        public const string ModVersion = "1.0.0";
         /// <summary>
         /// MelonLoader Version.
         /// </summary>

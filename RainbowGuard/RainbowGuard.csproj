@@ -9,7 +9,7 @@
 		<Company>$(Authors)</Company>
 		<Title>Rainbow Guard</Title>
 		<Authors>ninjaguardian (github)</Authors>
-		<Description>Change the color of the guard effect</Description>
+		<Description>Changes the color of the guard effect</Description>
 		<Copyright>Copyright © 2026 ninjaguardian (github), This work is dedicated to the public domain under CC0 1.0.</Copyright>
 		<PackageLicenseExpression>CC0-1.0</PackageLicenseExpression>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
@@ -17,7 +17,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/ninjaguardian/RainbowGuard</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<VersionPrefix>0.0.1</VersionPrefix>
+		<VersionPrefix>1.0.0</VersionPrefix>
 		<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 		<FileVersion>$(VersionPrefix).0</FileVersion>
 		<PackageIcon>icon.png</PackageIcon>

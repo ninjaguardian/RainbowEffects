@@ -1,0 +1,21 @@
+# Rainbow Guard
+![Photo](https://raw.githubusercontent.com/ninjaguardian/RainbowGuard/master/icon.png)
+
+[![Github](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3.2.0/assets/cozy/available/github_vector.svg)](https://github.com/ninjaguardian/RainbowGuard)
+[![Changelog](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3.2.0/assets/cozy/documentation/changelog_vector.svg)](https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowGuard/changelog)
+[![Thunderstore](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3.2.0/assets/cozy/documentation/website_vector.svg)](https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowGuard)
+
+## What is this?
+This mod lets you change the color of the guard effect.
+
+## Instructions
+1. Install [MelonLoader](https://github.com/LavaGang/MelonLoader)
+2. Run RUMBLE without mods
+3. Drop Mods from .zip into RUMBLE's installation folder
+4. Play RUMBLE!
+
+## Help And Other Resources
+Get help and find other resources in the [Modding Discord](https://discord.gg/fsbcnZgzfa)
+
+
+[![CC0-1.0 License](https://img.shields.io/badge/License-CC0_1.0_Universal-green.svg)](https://github.com/ninjaguardian/HealthDisplayWithFont?tab=CC0-1.0-1-ov-file)
