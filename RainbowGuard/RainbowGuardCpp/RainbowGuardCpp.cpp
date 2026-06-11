@@ -18,7 +18,25 @@ namespace {
 		const int32_t offset = *reinterpret_cast<int32_t*>(p + 1);
 		return p + 5 + offset;
 	}*/
+
+	//kiero::D3D11Output output;
 }
+
+//void InitKiero()
+//{
+//	const auto error = kiero::locate<kiero::Implementation_D3D11>(nullptr, &output);
+//	if (error != kiero::Error_Nil)
+//	{
+//		if (logger_err)
+//		{
+//			char buffer[256];
+//			if (sprintf_s(buffer, sizeof(buffer),
+//				"Failed to locate D3D11: %d", error) > 0)
+//				logger_err(buffer);
+//		}
+//		return nullptr;
+//	}
+//}
 
 void* GetCreatePixelShader()
 {

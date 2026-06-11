@@ -1,10 +1,11 @@
 ﻿using MelonLoader;
 using MelonLoader.NativeUtils;
+using MelonLoader.Utils;
 using RainbowGuard;
 using System;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using UnityEngine;
 
 #region Assemblies
@@ -61,7 +62,7 @@ namespace RainbowGuard
                 return;
             }
 
-            CallbackStore.Init();
+            LogStore.Init();
             CreatePixelShaderStore.Init();
 
             _didLoad = true;
@@ -73,7 +74,7 @@ namespace RainbowGuard
             if (!_didLoad)
                 return;
 
-            CallbackStore.DeInit();
+            LogStore.DeInit();
             CreatePixelShaderStore.DeInit();
         }
     }
@@ -92,6 +93,10 @@ namespace RainbowGuard
             IntPtr* pixelShader
         );
         private static NativeHook<CreatePixelShader>? _hookInstance;
+        // ReSharper disable StringLiteralTypo
+        private static readonly byte[] MatchShader = File.ReadAllBytes(Path.Combine(MelonEnvironment.UserDataDirectory, RainbowGuardModInfo.ModName, "match.dxbc"));
+        private static readonly byte[] NewShader = File.ReadAllBytes(Path.Combine(MelonEnvironment.UserDataDirectory, RainbowGuardModInfo.ModName, "new.dxbc"));
+        // ReSharper restore StringLiteralTypo
 
         internal static void Init()
         {
@@ -129,27 +134,38 @@ namespace RainbowGuard
             IntPtr* pixelShader
         )
         {
-            if (shaderBytecode != null && bytecodeLength > 0)
+            if (
+                shaderBytecode == null ||
+                bytecodeLength != (nuint)MatchShader.Length ||
+                !new ReadOnlySpan<byte>(shaderBytecode, MatchShader.Length).SequenceEqual(MatchShader)
+            )
             {
-                // TODO: get faster hashing system
-                ReadOnlySpan<byte> span = new(shaderBytecode, (int)bytecodeLength);
-
-                byte[] hash = SHA256.HashData(span);
-
-                MelonLogger.Msg($"Shader hash: {Convert.ToHexString(hash)}");
+                return _hookInstance!.Trampoline(
+                    device,
+                    shaderBytecode,
+                    bytecodeLength,
+                    classLinkage,
+                    pixelShader
+                );
             }
 
-            return _hookInstance!.Trampoline(
-                device,
-                shaderBytecode,
-                bytecodeLength,
-                classLinkage,
-                pixelShader
-            );
+
+            MelonLogger.Msg("MATCH!");
+
+            fixed (byte* pNewShader = NewShader)
+            {
+                return _hookInstance!.Trampoline(
+                    device,
+                    pNewShader,
+                    (nuint)NewShader.Length,
+                    classLinkage,
+                    pixelShader
+                );
+            }
         }
     }
 
-    internal static class CallbackStore
+    internal static class LogStore
     {
         [DllImport(RainbowGuardModInfo.NativeDll, CallingConvention = CallingConvention.Cdecl)]
         private static extern void SetLogCallback(LogCallback? msg, LogCallback? warn, LogCallback? err);
