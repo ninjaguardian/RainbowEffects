@@ -8,7 +8,7 @@ add_library(RainbowGuardCpp SHARED
 )
 
 target_compile_definitions(RainbowGuardCpp PRIVATE RAINBOWGUARDCPP_EXPORTS)
-target_compile_features(RainbowGuardCpp PRIVATE cxx_std_17)
+target_compile_features(RainbowGuardCpp PRIVATE cxx_std_23)
 
 include(FetchContent)
 
@@ -28,13 +28,3 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(kiero)
 
 target_link_libraries(RainbowGuardCpp PRIVATE kiero::kiero)
-
-FetchContent_Declare(
-  minhook
-  GIT_REPOSITORY https://github.com/TsudaKageyu/minhook.git
-  GIT_TAG master
-)
-
-FetchContent_MakeAvailable(minhook)
-
-target_link_libraries(RainbowGuardCpp PRIVATE minhook)
