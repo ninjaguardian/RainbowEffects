@@ -5,6 +5,7 @@
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<LangVersion>12.0</LangVersion>
 
 		<Company>$(Authors)</Company>
 		<Title>Rainbow Guard</Title>
@@ -45,20 +46,6 @@
 		<DefineConstants>DEBUG</DefineConstants>
 		<Optimize>False</Optimize>
 	</PropertyGroup>
-
-	<PropertyGroup>
-		<CppConfig Condition="'$(Configuration)' == 'Debug'">Debug</CppConfig>
-		<CppConfig Condition="'$(Configuration)' != 'Debug'">Release</CppConfig>
-	</PropertyGroup>
-	
-	<Target Name="BuildNativeDLL" BeforeTargets="Build">
-		<Exec Command="cmake --fresh -S &quot;$(ProjectDir)RainbowGuardCpp&quot; -B &quot;$(ProjectDir)RainbowGuardCpp/build&quot; -A x64" />
-		<Exec Command="cmake --build &quot;$(ProjectDir)RainbowGuardCpp/build&quot; --config $(CppConfig)" />
-	</Target>
-
-	<Target Name="PostBuildCpp" AfterTargets="BuildNativeDLL" Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='ReleaseAndSave'">
-		<Exec Command="copy /Y &quot;$([System.IO.Path]::Combine('$(ProjectDir)', 'RainbowGuardCpp', 'build', '$(CppConfig)', 'RainbowGuardCpp.dll'))&quot; &quot;$([System.IO.Path]::Combine('$(LIBSDIRPATH)', 'UserLibs'))&quot;" />
-	</Target>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='ReleaseAndSave'">
 		<Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;$([System.IO.Path]::Combine('$(LIBSDIRPATH)', 'Mods'))&quot;" />
