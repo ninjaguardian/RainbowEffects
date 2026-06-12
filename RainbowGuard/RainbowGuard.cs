@@ -3,6 +3,7 @@ using MelonLoader.NativeUtils;
 using MelonLoader.Utils;
 using RainbowGuard;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -59,7 +60,19 @@ namespace RainbowGuard
                 return;
             }
 
-            CreatePixelShaderStore.Init();
+            D3D11Output? output = Locate();
+            if (output == null)
+            {
+                MelonLogger.Error("Could not generate D3D11 device");
+                return;
+            }
+
+            using (output)
+            {
+                CreatePixelShaderStore.Init(output);
+                HookCB.Init(output);
+                HookShader.Init(output);
+            }
 
             _didLoad = true;
         }
@@ -71,54 +84,198 @@ namespace RainbowGuard
                 return;
 
             CreatePixelShaderStore.DeInit();
+            HookCB.DeInit();
+            HookShader.DeInit();
+        }
+    }
+
+    internal static class HookShader
+    {
+        private static NativeHook<PSSetShader>? _hookInstance;
+
+        internal static readonly object Lock = new();
+        internal static readonly Dictionary<IntPtr, IntPtr> CurrentPsByContext = [];
+        internal const string Match = "Hidden/VFX/Guardstone VFX/System/Output Particle Shader Graph Quad - Unlit";
+
+        internal static void Init(D3D11Output output)
+        {
+            if (_hookInstance != null)
+                return;
+
+            if (output.Context == IntPtr.Zero)
+            {
+                MelonLogger.Error("Could not generate D3D11 context methods");
+                return;
+            }
+
+            IntPtr setShader = GetVTableEntry(output.Context, 9);
+            if (setShader == IntPtr.Zero)
+            {
+                MelonLogger.Error("Failed to get PSSetShader");
+                return;
+            }
+
+            IntPtr detour;
+            unsafe
+            {
+                detour = (IntPtr)(delegate* unmanaged[Stdcall]<IntPtr, IntPtr, IntPtr*, uint, void>)&Hook;
+            }
+            _hookInstance = new NativeHook<PSSetShader>(setShader, detour);
+            _hookInstance.Attach();
+        }
+
+        internal static void DeInit()
+        {
+            _hookInstance?.Detach();
+            _hookInstance = null;
+        }
+
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        private static unsafe void Hook(IntPtr context, IntPtr pPixelShader, IntPtr* ppClassInstances, uint numClassInstances)
+        {
+            _hookInstance!.Trampoline(
+                context,
+                pPixelShader,
+                ppClassInstances,
+                numClassInstances
+            );
+
+            lock (Lock)
+                CurrentPsByContext[context] = pPixelShader;
+        }
+    }
+
+    internal static class HookCB
+    {
+        private static NativeHook<PSSetConstantBuffers>? _hookInstance;
+        private const string BufferName = "ConstantBuffer-733-1632";
+
+        internal static void Init(D3D11Output output)
+        {
+            if (_hookInstance != null)
+                return;
+
+            if (output.Context == IntPtr.Zero)
+            {
+                MelonLogger.Error("Could not generate D3D11 context methods");
+                return;
+            }
+
+            IntPtr setConstantBuffers = GetVTableEntry(output.Context, 16);
+            if (setConstantBuffers == IntPtr.Zero)
+            {
+                MelonLogger.Error("Failed to get PSSetConstantBuffers");
+                return;
+            }
+
+            IntPtr detour;
+            unsafe
+            {
+                detour = (IntPtr)(delegate* unmanaged[Stdcall]<IntPtr, uint, uint, IntPtr*, void>)&Hook;
+            }
+            _hookInstance = new NativeHook<PSSetConstantBuffers>(setConstantBuffers, detour);
+            _hookInstance.Attach();
+        }
+
+        internal static void DeInit()
+        {
+            _hookInstance?.Detach();
+            _hookInstance = null;
+        }
+
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        private static unsafe void Hook(IntPtr context, uint startSlot, uint numBuffers, IntPtr* ppConstantBuffers)
+        {
+            _hookInstance!.Trampoline(
+                context,
+                startSlot,
+                numBuffers,
+                ppConstantBuffers
+            );
+
+            IntPtr currentPs;
+            lock (HookShader.Lock)
+                HookShader.CurrentPsByContext.TryGetValue(context, out currentPs);
+            if (currentPs == IntPtr.Zero || GetDebugName(currentPs) != HookShader.Match)
+                return;
+
+            IntPtr mapPtr = GetVTableEntry(context, 14);
+            if (mapPtr == IntPtr.Zero)
+            {
+                MelonLogger.Error("Failed to get Map");
+                return;
+            }
+            var map = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, uint, D3D11_MAP, D3D11_MAP_FLAG, out D3D11_MAPPED_SUBRESOURCE, HResult>)mapPtr;
+
+            IntPtr unmapPtr = GetVTableEntry(context, 15);
+            if (unmapPtr == IntPtr.Zero)
+            {
+                MelonLogger.Error("Failed to get Unmap");
+                return;
+            }
+            var unmap = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, uint, void>)unmapPtr;
+
+            for (uint i = 0; i < numBuffers; i++)
+            {
+                IntPtr resource = ppConstantBuffers[i];
+                if (GetDebugName(resource) != BufferName)
+                    continue;
+
+                HResult err = map(context, resource, 0, D3D11_MAP.D3D11_MAP_WRITE_DISCARD, 0, out D3D11_MAPPED_SUBRESOURCE pMappedResource);
+                if (err != HResult.S_OK)
+                {
+                    MelonLogger.Error($"Could not map buffer {err}");
+                    continue;
+                }
+
+                float* f = (float*)pMappedResource.pData;
+                double t = Environment.TickCount * 0.0005;
+
+                f[0] = (float)(Math.Sin(t * 2.0) * 0.5 + 0.5);
+                f[1] = (float)(Math.Sin(t * 2.0 + 2.094) * 0.5 + 0.5);
+                f[2] = (float)(Math.Sin(t * 2.0 + 4.188) * 0.5 + 0.5);
+                // f[3] is unused
+
+                unmap(context, resource, 0);
+            }
         }
     }
 
     internal static class CreatePixelShaderStore
     {
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        private unsafe delegate int CreatePixelShader(
-            IntPtr device,
-            void* shaderBytecode,
-            nuint bytecodeLength,
-            IntPtr classLinkage,
-            IntPtr* pixelShader
-        );
         private static NativeHook<CreatePixelShader>? _hookInstance;
         // ReSharper disable StringLiteralTypo
         private static readonly byte[] MatchShader = File.ReadAllBytes(Path.Combine(MelonEnvironment.UserDataDirectory, RainbowGuardModInfo.ModName, "match.dxbc"));
         private static readonly byte[] NewShader = File.ReadAllBytes(Path.Combine(MelonEnvironment.UserDataDirectory, RainbowGuardModInfo.ModName, "new.dxbc"));
         // ReSharper restore StringLiteralTypo
 
-        internal static void Init()
+        internal static void Init(D3D11Output output)
         {
             if (_hookInstance != null)
                 return;
 
-            D3D11Output? output = Locate();
-            if (output == null || output.Device == IntPtr.Zero)
+            if (output.Device == IntPtr.Zero)
             {
-                MelonLogger.Error("Could not generate D3D11 device");
+                MelonLogger.Error("Could not generate D3D11 device methods");
                 return;
             }
 
-            using (output)
+            IntPtr createPixelShader = GetVTableEntry(output.Device, 15);
+            if (createPixelShader == IntPtr.Zero)
             {
-                IntPtr createPixelShader = GetVTableEntry(output.Device, 15);
-                if (createPixelShader == IntPtr.Zero)
-                {
-                    MelonLogger.Error("Failed to get CreatePixelShader");
-                    return;
-                }
-
-                IntPtr detour;
-                unsafe
-                {
-                    detour = (IntPtr)(delegate* unmanaged[Stdcall]<IntPtr, void*, nuint, IntPtr, IntPtr*, int>)&Hook;
-                }
-                _hookInstance = new NativeHook<CreatePixelShader>(createPixelShader, detour);
-                _hookInstance.Attach();
+                MelonLogger.Error("Failed to get CreatePixelShader");
+                return;
             }
+
+            IntPtr detour;
+            unsafe
+            {
+                detour = (IntPtr)(delegate* unmanaged[Stdcall]<IntPtr, void*, nuint, IntPtr, IntPtr*, HResult>)&Hook;
+            }
+            _hookInstance = new NativeHook<CreatePixelShader>(createPixelShader, detour);
+            _hookInstance.Attach();
         }
 
         internal static void DeInit()
@@ -212,7 +369,7 @@ namespace RainbowGuard
 
         [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private static unsafe int Hook(
+        private static unsafe HResult Hook(
             IntPtr device,
             void* shaderBytecode,
             nuint bytecodeLength,

@@ -59,6 +59,7 @@ namespace RainbowGuard
         // ReSharper disable InconsistentNaming
         // ReSharper disable IdentifierTypo
         // ReSharper disable UnusedMember.Local
+        // ReSharper disable UnusedMember.Global
 
         #region Data Structures
 
@@ -70,6 +71,21 @@ namespace RainbowGuard
             E_OUTOFMEMORY = unchecked((int)0x8007000E),
             E_FAIL = unchecked((int)0x80004005)
         }
+
+        internal enum D3D11_MAP : uint
+        {
+            D3D11_MAP_READ = 1,
+            D3D11_MAP_WRITE = 2,
+            D3D11_MAP_READ_WRITE = 3,
+            D3D11_MAP_WRITE_DISCARD = 4,
+            D3D11_MAP_WRITE_NO_OVERWRITE = 5
+        };
+
+        [Flags]
+        internal enum D3D11_MAP_FLAG : uint
+        {
+            D3D11_MAP_FLAG_DO_NOT_WAIT = 0x100000
+        };
 
         private enum D3D_FEATURE_LEVEL : uint
         {
@@ -321,6 +337,14 @@ namespace RainbowGuard
             public DXGI_SWAP_CHAIN_FLAG Flags;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        internal unsafe struct D3D11_MAPPED_SUBRESOURCE
+        {
+            public void* pData;
+            public uint RowPitch;
+            public uint DepthPitch;
+        }
+
 #if PRINT_CB
         [StructLayout(LayoutKind.Sequential)]
         internal struct D3D11_SHADER_DESC
@@ -378,14 +402,17 @@ namespace RainbowGuard
 
         #endregion
 
-        internal struct Rrid
+        internal static class Rrid
         {
             public static Guid IDXGIFactory = new("7b7166ec-21c7-44ae-b21a-c9ae321ae369");
+            public static Guid WKPDID_D3DDebugObjectName = new(0x429b8c22, 0x9188, 0x4b0c, 0x87, 0x42, 0xac, 0xb0, 0xbf, 0x85, 0xc2, 0x00);
+            public static Guid WKPDID_D3DDebugObjectNameW = new(0x4cca5fd8, 0x921f, 0x42c8, 0x85, 0x66, 0x70, 0xca, 0xf2, 0xa9, 0xb7, 0x41);
 #if PRINT_CB
             public static Guid IID_ID3D11ShaderReflection = new("8d536ca1-0cca-4956-a837-786963755584");
 #endif
         }
 
+        // ReSharper restore UnusedMember.Global
         // ReSharper restore UnusedMember.Local
         // ReSharper restore IdentifierTypo
         // ReSharper restore InconsistentNaming
@@ -553,6 +580,54 @@ namespace RainbowGuard
                 if (factoryPtr != IntPtr.Zero)
                     Marshal.Release(factoryPtr);
             }
+        }
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        internal unsafe delegate HResult CreatePixelShader(
+            IntPtr device,
+            [In] void* shaderBytecode,
+            [In] nuint bytecodeLength,
+            [In] IntPtr classLinkage,
+            [Out] IntPtr* pixelShader
+        );
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        internal unsafe delegate void PSSetShader( // 9
+            IntPtr context,
+            [In] IntPtr pPixelShader,
+            [In] IntPtr* ppClassInstances,
+            uint numClassInstances
+        );
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        internal unsafe delegate void PSSetConstantBuffers( // 16
+            IntPtr context,
+            [In] uint startSlot,
+            [In] uint numBuffers,
+            [In] IntPtr* ppConstantBuffers // Array of ID3D11Buffer
+        );
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        internal static unsafe string GetDebugName(IntPtr deviceChild)
+        {
+            if (deviceChild == IntPtr.Zero)
+                return "<null>";
+
+            var getPrivateData = (delegate* unmanaged[Stdcall]<IntPtr, ref Guid, ref uint, void*, HResult>)
+                GetVTableEntry(deviceChild, 4);
+
+            if (getPrivateData == null)
+                return "<unnamed>";
+
+            uint size = 256;
+            byte* data = stackalloc byte[(int)size];
+
+            HResult hr = getPrivateData(deviceChild, ref Rrid.WKPDID_D3DDebugObjectName, ref size, data);
+            if (hr != HResult.S_OK || size == 0)
+                return "<unnamed>";
+
+            string name = Marshal.PtrToStringAnsi((IntPtr)data, (int)size);
+            return string.IsNullOrEmpty(name) ? "<unnamed>" : name.TrimEnd('\0');
         }
 
 #if PRINT_CB
