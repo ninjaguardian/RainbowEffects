@@ -1,0 +1,28 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36401.2 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{42AF76D8-AC6E-41D0-A578-3D7C258AF9FA}") = "RainbowGuard", "RainbowGuard\RainbowGuard.csproj", "{9B106364-42FA-4DDB-89AB-593558E5BA34}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+		ReleaseAndSave|x64 = ReleaseAndSave|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9B106364-42FA-4DDB-89AB-593558E5BA34}.Debug|x64.ActiveCfg = Debug|x64
+		{9B106364-42FA-4DDB-89AB-593558E5BA34}.Debug|x64.Build.0 = Debug|x64
+		{9B106364-42FA-4DDB-89AB-593558E5BA34}.Release|x64.ActiveCfg = Release|x64
+		{9B106364-42FA-4DDB-89AB-593558E5BA34}.Release|x64.Build.0 = Release|x64
+		{9B106364-42FA-4DDB-89AB-593558E5BA34}.ReleaseAndSave|x64.ActiveCfg = ReleaseAndSave|x64
+		{9B106364-42FA-4DDB-89AB-593558E5BA34}.ReleaseAndSave|x64.Build.0 = ReleaseAndSave|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9969E7FA-10E9-486C-A088-483C3D91A705}
+	EndGlobalSection
+EndGlobal

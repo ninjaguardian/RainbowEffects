@@ -243,6 +243,7 @@ jobs:
       - name: Install 7z
         shell: pwsh
         run: |
+          Write-Host $PSVersionTable
           $Url = "https://www.7-zip.org/download.html"
           $Html = Invoke-WebRequest -Uri $Url
           $Html.Content -match 'Download 7-Zip (\d+\.\d+)'
@@ -273,6 +274,7 @@ jobs:
           PK8_B64: ${{ secrets.PK8 }}
         run: |
           $ErrorActionPreference = 'Stop'   # NOTE: only auto prepended when using pwsh
+          Write-Host $PSVersionTable
           $unpackDir = "unpackassembly"
           New-Item -ItemType Directory -Path $unpackDir -Force
           $assemblyParent = Join-Path $env:GITHUB_WORKSPACE 'il2cppassembliesrepo'
