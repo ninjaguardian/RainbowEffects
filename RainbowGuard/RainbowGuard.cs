@@ -21,7 +21,7 @@ using static RainbowGuard.DXInterop;
 [assembly: VerifyLoaderVersion(RainbowGuardModInfo.MLVersion, true)]
 #endregion
 
-// TODO: linux
+// TODO: linux (maybe works already)
 // TODO: instead of hooks, find what corresponds to _Color
 
 namespace RainbowGuard
