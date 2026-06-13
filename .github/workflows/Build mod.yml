@@ -169,17 +169,14 @@ jobs:
         run: |
           Set-Location steamcmdstuff
           .\steamcmd.exe +quit
-          $code = $LASTEXITCODE
-          if ($code -eq 7) {
+          if ($LASTEXITCODE -eq 7) {
             Write-Host "SteamCMD returned exit code 7 (ignoring)."
-            $code = 0
+            exit 0
           }
-          exit $code
 
       - name: Get RUMBLE version
         shell: pwsh
         run: |
-          Write-Host $PSVersionTable
           Set-Location steamcmdstuff
           $output = .\steamcmd.exe +login anonymous +app_info_print 890550 +quit
 
@@ -234,17 +231,16 @@ jobs:
       # TODO: Remove install entirely when gh actions uses a powershell with .net 10
       - name: Install Powershell
         shell: pwsh
-        continue-on-error: true
-        run: winget install Microsoft.PowerShell --accept-package-agreements --accept-source-agreements --disable-interactivity --silent
-
-      - name: Validate Powershell
-        shell: pwsh
-        run: if (-not (Test-Path "C:\Program Files\PowerShell\7\pwsh.exe")) { throw "Powershell not found" }
+        run: |
+          winget install Microsoft.PowerShell --accept-package-agreements --accept-source-agreements --disable-interactivity --silent
+          if ($LASTEXITCODE -eq 1) {
+            Write-Host "Winget returned exit code 1 (ignoring)."
+            exit 0
+          }
 
       - name: Install 7z
         shell: pwsh
         run: |
-          Write-Host $PSVersionTable
           $Url = "https://www.7-zip.org/download.html"
           $Html = Invoke-WebRequest -Uri $Url
           $Html.Content -match 'Download 7-Zip (\d+\.\d+)'
@@ -269,13 +265,11 @@ jobs:
         run: echo "C:\Program Files\PowerShell" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Unpack assembly
-        shell: 7\pwsh.exe -command "Copy-Item '{0}' '{0}.ps1'; . '{0}.ps1'"
+        shell: pwsh
         env:
           IL2CPPASSEMBLIES7ZIPPASSWORD: ${{ secrets.IL2CPPASSEMBLIES7ZIPPASSWORD }}
           PK8_B64: ${{ secrets.PK8 }}
         run: |
-          $ErrorActionPreference = 'Stop'   # NOTE: only auto prepended when using pwsh
-          Write-Host $PSVersionTable
           $unpackDir = "unpackassembly"
           New-Item -ItemType Directory -Path $unpackDir -Force
           $assemblyParent = Join-Path $env:GITHUB_WORKSPACE 'il2cppassembliesrepo'
@@ -373,7 +367,6 @@ jobs:
           Remove-Item $unpackDir -Recurse -Force
           Remove-Item $assemblyParent -Recurse -Force
           Remove-Item $outExtractDir -Recurse -Force
-          if ((Test-Path -LiteralPath variable:\LASTEXITCODE)) { exit $LASTEXITCODE }   # NOTE: only auto appended when using pwsh
 
       - name: Setup .NET SDK 6.0
         uses: actions/setup-dotnet@v5
@@ -411,7 +404,7 @@ jobs:
 
       - name: Upload build artifact
         if: ${{ env.DLLVERSION != '' }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
          name: ninjaguardian-${{ vars.DLLNAME_NO_EXT }}-${{ env.DLLVERSION }}
          path: ${{ env.BINPATH }}\artifactsetup
@@ -431,7 +424,7 @@ jobs:
           sparse-checkout: CHANGELOG.md
 
       - name: Download build artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: ninjaguardian-${{ vars.DLLNAME_NO_EXT }}-${{ env.DLLVERSION }}
           path: artifact-download
@@ -481,7 +474,7 @@ jobs:
           Write-Host "$body"
 
       - name: Create GitHub Release and upload artifact
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: ninjaguardian-${{ vars.DLLNAME_NO_EXT }}-${{ env.DLLVERSION }}.zip
           body: ${{ env.body }}
