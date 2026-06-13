@@ -236,6 +236,10 @@ jobs:
           winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
           # TODO: Remove install entirely when gh actions uses a powershell with .net 10
           winget install Microsoft.PowerShell --disable-interactivity
+
+      - name: Install 7z
+        shell: pwsh
+        run: |
           $Url = "https://www.7-zip.org/download.html"
           $Html = Invoke-WebRequest -Uri $Url
           $Html.Content -match 'Download 7-Zip (\d+\.\d+)'
