@@ -20,13 +20,6 @@ jobs:
       dllversion: ${{ steps.setversion.outputs.dllversion }}
 
     steps:
-      - name: test
-        shell: pwsh
-        run: |
-          Write-Host $PSVersionTable
-          dotnet --list-sdks
-          dotnet --list-runtimes
-
       - uses: actions/checkout@v6
         with:
           sparse-checkout: |
@@ -39,7 +32,6 @@ jobs:
         id: setversion
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           $version = (Get-Content manifest.json | ConvertFrom-Json).version_number
           Write-Output "VERSIONNUM=$version" >> $env:GITHUB_ENV
           Write-Output "dllversion=$version" >> $env:GITHUB_OUTPUT
@@ -100,7 +92,6 @@ jobs:
       - name: Get deps hash
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           $dependencies = (Get-Content manifest.json | ConvertFrom-Json).dependencies -join "`n"
           $bytes = [System.Text.Encoding]::UTF8.GetBytes($dependencies)
           $memoryStream = [System.IO.MemoryStream]::new($bytes)
@@ -122,7 +113,6 @@ jobs:
         if: steps.cache-deps.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           $deps = (Get-Content manifest.json | ConvertFrom-Json).dependencies
           New-Item -ItemType Directory -Force -Path $env:LIBSDIRPATH | Out-Null
           foreach ($dep in $deps) {
@@ -138,7 +128,6 @@ jobs:
         if: steps.cache-deps.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           $detectionPath = Join-Path $env:LIBSDIRPATH "*.zip"
           Get-ChildItem $detectionPath | ForEach-Object {
             $zip = $_.FullName
@@ -150,7 +139,6 @@ jobs:
         if: steps.cache-deps.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           $removedFiles = Get-ChildItem -Path $env:LIBSDIRPATH -File | Where-Object { $_.Name -ne "version.dll" }
           foreach ($file in $removedFiles) {
             Write-Host "Removing file: $($file.FullName)"
@@ -167,7 +155,6 @@ jobs:
       - name: Download steamcmd
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           New-Item -ItemType Directory -Path "steamcmdstuff" -Force
           Set-Location steamcmdstuff
           $steamcmdUrl = "https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip"
@@ -180,7 +167,6 @@ jobs:
       - name: Install steamcmd
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           Set-Location steamcmdstuff
           .\steamcmd.exe +quit
           $code = $LASTEXITCODE
@@ -193,7 +179,6 @@ jobs:
       - name: Get RUMBLE version
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           Set-Location steamcmdstuff
           $output = .\steamcmd.exe +login anonymous +app_info_print 890550 +quit
 
@@ -245,18 +230,12 @@ jobs:
         shell: pwsh
         run: Remove-Item steamcmdstuff -Recurse -Force
 
-      - name: Setup .NET SDK 10
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: '10'
-
       - name: Install Powershell and 7z
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
-          # TODO: switch off preview. make sure to change other steps that use preview. also remove install entirely when gh actions supports powershell with .net 10
-          winget install Microsoft.PowerShell.Preview --disable-interactivity
+          # TODO: Remove install entirely when gh actions uses a powershell with .net 10
+          winget install Microsoft.PowerShell --disable-interactivity
           $Url = "https://www.7-zip.org/download.html"
           $Html = Invoke-WebRequest -Uri $Url
           $Html.Content -match 'Download 7-Zip (\d+\.\d+)'
@@ -281,12 +260,12 @@ jobs:
         run: echo "C:\Program Files\PowerShell" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Unpack assembly
-        shell: 7-preview\pwsh.exe -command "Copy-Item '{0}' '{0}.ps1'; . '{0}.ps1'"
+        shell: 7\pwsh.exe -command "Copy-Item '{0}' '{0}.ps1'; . '{0}.ps1'"
         env:
           IL2CPPASSEMBLIES7ZIPPASSWORD: ${{ secrets.IL2CPPASSEMBLIES7ZIPPASSWORD }}
           PK8_B64: ${{ secrets.PK8 }}
         run: |
-          $ErrorActionPreference = 'Stop'
+          $ErrorActionPreference = 'Stop'   # NOTE: only auto prepended when using pwsh
           $unpackDir = "unpackassembly"
           New-Item -ItemType Directory -Path $unpackDir -Force
           $assemblyParent = Join-Path $env:GITHUB_WORKSPACE 'il2cppassembliesrepo'
@@ -384,6 +363,7 @@ jobs:
           Remove-Item $unpackDir -Recurse -Force
           Remove-Item $assemblyParent -Recurse -Force
           Remove-Item $outExtractDir -Recurse -Force
+          if ((Test-Path -LiteralPath variable:\LASTEXITCODE)) { exit $LASTEXITCODE }   # NOTE: only auto appended when using pwsh
 
       - name: Setup .NET SDK 6.0
         uses: actions/setup-dotnet@v5
@@ -407,7 +387,6 @@ jobs:
         if: ${{ env.DLLVERSION != '' }}
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           $binPath = "${{ vars.DLLNAME_NO_EXT }}\bin\Release"
           New-Item -ItemType Directory -Force -Path $binPath\artifactsetup\Mods
           Move-Item -Path $binPath\${{ vars.DLLNAME_NO_EXT }}.dll -Destination $binPath\artifactsetup\Mods
@@ -450,13 +429,11 @@ jobs:
       - name: Zip artifact
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           Compress-Archive -Path artifact-download\* -DestinationPath ninjaguardian-${{ vars.DLLNAME_NO_EXT }}-${{ env.DLLVERSION }}.zip
 
       - name: Extract changelog for release
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           $version = "v${{ env.DLLVERSION }}"
           $lines = Get-Content CHANGELOG.md
 
