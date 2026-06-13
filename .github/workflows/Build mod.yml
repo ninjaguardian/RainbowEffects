@@ -232,10 +232,15 @@ jobs:
 
       - name: Install Powershell
         shell: pwsh
+        continue-on-error: true
         run: |
           winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity --silent
           # TODO: Remove install entirely when gh actions uses a powershell with .net 10
           winget install Microsoft.PowerShell --disable-interactivity --silent
+
+      - name: Validate Powershell
+        shell: pwsh
+        run: if (-not (Test-Path "C:\Program Files\PowerShell\7\pwsh.exe")) { throw "Powershell not found" }
 
       - name: Install 7z
         shell: pwsh
