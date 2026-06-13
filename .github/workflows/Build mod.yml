@@ -230,13 +230,11 @@ jobs:
         shell: pwsh
         run: Remove-Item steamcmdstuff -Recurse -Force
 
+      # TODO: Remove install entirely when gh actions uses a powershell with .net 10
       - name: Install Powershell
         shell: pwsh
         continue-on-error: true
-        run: |
-          winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity --silent
-          # TODO: Remove install entirely when gh actions uses a powershell with .net 10
-          winget install Microsoft.PowerShell --disable-interactivity --silent
+        run: winget install Microsoft.PowerShell --accept-package-agreements --accept-source-agreements --disable-interactivity --silent
 
       - name: Validate Powershell
         shell: pwsh
