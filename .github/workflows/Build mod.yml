@@ -230,12 +230,12 @@ jobs:
         shell: pwsh
         run: Remove-Item steamcmdstuff -Recurse -Force
 
-      - name: Install Powershell and 7z
+      - name: Install Powershell
         shell: pwsh
         run: |
-          winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
+          winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity --silent
           # TODO: Remove install entirely when gh actions uses a powershell with .net 10
-          winget install Microsoft.PowerShell --disable-interactivity
+          winget install Microsoft.PowerShell --disable-interactivity --silent
 
       - name: Install 7z
         shell: pwsh
