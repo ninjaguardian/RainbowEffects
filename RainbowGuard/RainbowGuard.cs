@@ -21,6 +21,9 @@ using static RainbowGuard.DXInterop;
 [assembly: VerifyLoaderVersion(RainbowGuardModInfo.MLVersion, true)]
 #endregion
 
+// TODO: linux
+// TODO: instead of hooks, find what corresponds to _Color
+
 namespace RainbowGuard
 {
     #region RainbowGuardModInfo
@@ -150,6 +153,7 @@ namespace RainbowGuard
     {
         private static NativeHook<PSSetConstantBuffers>? _hookInstance;
         private const string BufferName = "ConstantBuffer-733-1632";
+        private const string LivBufferName = "ConstantBuffer-733-2128";
 
         internal static void Init(D3D11Output output)
         {
@@ -188,23 +192,30 @@ namespace RainbowGuard
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static unsafe void Hook(IntPtr context, uint startSlot, uint numBuffers, IntPtr* ppConstantBuffers)
         {
-            _hookInstance!.Trampoline(
-                context,
-                startSlot,
-                numBuffers,
-                ppConstantBuffers
-            );
-
             IntPtr currentPs;
             lock (HookShader.Lock)
                 HookShader.CurrentPsByContext.TryGetValue(context, out currentPs);
             if (currentPs == IntPtr.Zero || GetDebugName(currentPs) != HookShader.Match)
+            {
+                _hookInstance!.Trampoline(
+                    context,
+                    startSlot,
+                    numBuffers,
+                    ppConstantBuffers
+                );
                 return;
+            }
 
             IntPtr mapPtr = GetVTableEntry(context, 14);
             if (mapPtr == IntPtr.Zero)
             {
                 MelonLogger.Error("Failed to get Map");
+                _hookInstance!.Trampoline(
+                    context,
+                    startSlot,
+                    numBuffers,
+                    ppConstantBuffers
+                );
                 return;
             }
             var map = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, uint, D3D11_MAP, D3D11_MAP_FLAG, out D3D11_MAPPED_SUBRESOURCE, HResult>)mapPtr;
@@ -213,6 +224,12 @@ namespace RainbowGuard
             if (unmapPtr == IntPtr.Zero)
             {
                 MelonLogger.Error("Failed to get Unmap");
+                _hookInstance!.Trampoline(
+                    context,
+                    startSlot,
+                    numBuffers,
+                    ppConstantBuffers
+                );
                 return;
             }
             var unmap = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, uint, void>)unmapPtr;
@@ -220,26 +237,34 @@ namespace RainbowGuard
             for (uint i = 0; i < numBuffers; i++)
             {
                 IntPtr resource = ppConstantBuffers[i];
-                if (GetDebugName(resource) != BufferName)
+                string name = GetDebugName(resource);
+                if (name != BufferName && name != LivBufferName)
                     continue;
 
-                HResult err = map(context, resource, 0, D3D11_MAP.D3D11_MAP_WRITE_DISCARD, 0, out D3D11_MAPPED_SUBRESOURCE pMappedResource);
+                // TODO: instead of changing potentially used buffer slots or overwriting in use data, find a way to create a dedicated buffer
+                HResult err = map(context, resource, 0, D3D11_MAP.D3D11_MAP_WRITE_NO_OVERWRITE, 0, out D3D11_MAPPED_SUBRESOURCE pMappedResource);
                 if (err != HResult.S_OK)
                 {
-                    MelonLogger.Error($"Could not map buffer {err}");
+                    MelonLogger.Error($"Could not map buffer {name} ({err})");
                     continue;
                 }
 
                 float* f = (float*)pMappedResource.pData;
                 double t = Environment.TickCount * 0.0005;
 
-                f[0] = (float)(Math.Sin(t * 2.0) * 0.5 + 0.5);
-                f[1] = (float)(Math.Sin(t * 2.0 + 2.094) * 0.5 + 0.5);
-                f[2] = (float)(Math.Sin(t * 2.0 + 4.188) * 0.5 + 0.5);
-                // f[3] is unused
+                f[12] = (float)(Math.Sin(t * 2.0) * 0.5 + 0.5);
+                f[13] = (float)(Math.Sin(t * 2.0 + 2.094) * 0.5 + 0.5);
+                f[14] = (float)(Math.Sin(t * 2.0 + 4.188) * 0.5 + 0.5);
 
                 unmap(context, resource, 0);
             }
+
+            _hookInstance!.Trampoline(
+                context,
+                startSlot,
+                numBuffers,
+                ppConstantBuffers
+            );
         }
     }
 
@@ -247,8 +272,10 @@ namespace RainbowGuard
     {
         private static NativeHook<CreatePixelShader>? _hookInstance;
         // ReSharper disable StringLiteralTypo
-        private static readonly byte[] MatchShader = File.ReadAllBytes(Path.Combine(MelonEnvironment.UserDataDirectory, RainbowGuardModInfo.ModName, "match.dxbc"));
-        private static readonly byte[] NewShader = File.ReadAllBytes(Path.Combine(MelonEnvironment.UserDataDirectory, RainbowGuardModInfo.ModName, "new.dxbc"));
+        private static readonly byte[] MainMatchShader = File.ReadAllBytes(Path.Combine(MelonEnvironment.UserDataDirectory, RainbowGuardModInfo.ModName, "main.match.dxbc"));
+        private static readonly byte[] MainNewShader = File.ReadAllBytes(Path.Combine(MelonEnvironment.UserDataDirectory, RainbowGuardModInfo.ModName, "main.new.dxbc"));
+        private static readonly byte[] LivMatchShader = File.ReadAllBytes(Path.Combine(MelonEnvironment.UserDataDirectory, RainbowGuardModInfo.ModName, "liv.match.dxbc"));
+        private static readonly byte[] LivNewShader = File.ReadAllBytes(Path.Combine(MelonEnvironment.UserDataDirectory, RainbowGuardModInfo.ModName, "liv.new.dxbc"));
         // ReSharper restore StringLiteralTypo
 
         internal static void Init(D3D11Output output)
@@ -381,11 +408,7 @@ namespace RainbowGuard
             PrintConstantBuffers(shaderBytecode, bytecodeLength);
 #endif
 
-            if (
-                shaderBytecode == null ||
-                bytecodeLength != (nuint)MatchShader.Length ||
-                !new ReadOnlySpan<byte>(shaderBytecode, MatchShader.Length).SequenceEqual(MatchShader)
-            )
+            if (shaderBytecode == null)
             {
                 return _hookInstance!.Trampoline(
                     device,
@@ -396,19 +419,49 @@ namespace RainbowGuard
                 );
             }
 
-
-            MelonLogger.Msg("MATCH!");
-
-            fixed (byte* pNewShader = NewShader)
+            if
+            (
+                bytecodeLength == (nuint)MainMatchShader.Length &&
+                new ReadOnlySpan<byte>(shaderBytecode, MainMatchShader.Length).SequenceEqual(MainMatchShader)
+            )
             {
-                return _hookInstance!.Trampoline(
-                    device,
-                    pNewShader,
-                    (nuint)NewShader.Length,
-                    classLinkage,
-                    pixelShader
-                );
+                fixed (byte* pNewShader = MainNewShader)
+                {
+                    return _hookInstance!.Trampoline(
+                        device,
+                        pNewShader,
+                        (nuint)MainNewShader.Length,
+                        classLinkage,
+                        pixelShader
+                    );
+                }
             }
+
+            if
+            (
+                bytecodeLength == (nuint)LivMatchShader.Length &&
+                new ReadOnlySpan<byte>(shaderBytecode, LivMatchShader.Length).SequenceEqual(LivMatchShader)
+            )
+            {
+                fixed (byte* pNewShader = LivNewShader)
+                {
+                    return _hookInstance!.Trampoline(
+                        device,
+                        pNewShader,
+                        (nuint)LivNewShader.Length,
+                        classLinkage,
+                        pixelShader
+                    );
+                }
+            }
+
+            return _hookInstance!.Trampoline(
+                device,
+                shaderBytecode,
+                bytecodeLength,
+                classLinkage,
+                pixelShader
+            );
         }
     }
 }

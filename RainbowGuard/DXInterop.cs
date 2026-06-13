@@ -507,6 +507,7 @@ namespace RainbowGuard
                         <IntPtr, uint, out IntPtr, HResult>)
                     enumAdaptersFnPtr;
 
+                // TODO: is adapter 0 correct
                 err = enumAdapters(factoryPtr, 0, out adapterPtr);
                 if (err != HResult.S_OK)
                 {
