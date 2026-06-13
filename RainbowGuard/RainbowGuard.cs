@@ -97,7 +97,7 @@ namespace RainbowGuard
         private static NativeHook<PSSetShader>? _hookInstance;
 
         internal static readonly object Lock = new();
-        internal static readonly Dictionary<IntPtr, IntPtr> CurrentPsByContext = [];
+        internal static readonly Dictionary<IntPtr, IntPtr> CurrentPsByContext = new();
         internal const string Match = "Hidden/VFX/Guardstone VFX/System/Output Particle Shader Graph Quad - Unlit";
 
         internal static void Init(D3D11Output output)
@@ -133,7 +133,7 @@ namespace RainbowGuard
             _hookInstance = null;
         }
 
-        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static unsafe void Hook(IntPtr context, IntPtr pPixelShader, IntPtr* ppClassInstances, uint numClassInstances)
         {
@@ -188,7 +188,7 @@ namespace RainbowGuard
             _hookInstance = null;
         }
 
-        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static unsafe void Hook(IntPtr context, uint startSlot, uint numBuffers, IntPtr* ppConstantBuffers)
         {
@@ -394,7 +394,7 @@ namespace RainbowGuard
         }
 #endif
 
-        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static unsafe HResult Hook(
             IntPtr device,

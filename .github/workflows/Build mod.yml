@@ -179,6 +179,7 @@ jobs:
       - name: Get RUMBLE version
         shell: pwsh
         run: |
+          Write-Host $PSVersionTable
           Set-Location steamcmdstuff
           $output = .\steamcmd.exe +login anonymous +app_info_print 890550 +quit
 

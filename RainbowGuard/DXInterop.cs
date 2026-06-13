@@ -542,11 +542,11 @@ namespace RainbowGuard
                 scDesc.Flags = DXGI_SWAP_CHAIN_FLAG.DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
                 D3D_FEATURE_LEVEL[] featureLevels =
-                [
+                {
                     D3D_FEATURE_LEVEL.D3D_FEATURE_LEVEL_11_0,
                     D3D_FEATURE_LEVEL.D3D_FEATURE_LEVEL_10_1,
                     D3D_FEATURE_LEVEL.D3D_FEATURE_LEVEL_10_0
-                ];
+                };
 
                 err = D3D11CreateDeviceAndSwapChain(
                     adapterPtr,

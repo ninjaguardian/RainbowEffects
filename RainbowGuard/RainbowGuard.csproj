@@ -5,7 +5,6 @@
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<LangVersion>12.0</LangVersion>
 
 		<Company>$(Authors)</Company>
 		<Title>Rainbow Guard</Title>
