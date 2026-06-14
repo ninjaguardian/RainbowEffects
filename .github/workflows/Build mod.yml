@@ -228,22 +228,8 @@ jobs:
         shell: pwsh
         run: Remove-Item steamcmdstuff -Recurse -Force
 
-      - name: Install 7z
-        shell: pwsh
-        run: |
-          $Url = "https://www.7-zip.org/download.html"
-          $Html = Invoke-WebRequest -Uri $Url
-          $Html.Content -match 'Download 7-Zip (\d+\.\d+)'
-          $ver = $matches[1] -replace '\D', ''
-          $link = "https://www.7-zip.org/a/7z$($ver)-x64.msi"
-          Write-Host "Installing $($link)"
-          $msi = "$env:TEMP\7z.msi"
-          Invoke-WebRequest $link -OutFile $msi
-          msiexec /i $msi /quiet /norestart
-          Write-Host "Installed 7z"
-
-      # TODO: Remove install entirely when gh actions uses a powershell with .net 10
-      - name: Install Powershell
+      # TODO: Remove when gh actions uses a powershell with .net 10
+      - name: Update Powershell
         shell: pwsh
         continue-on-error: true
         run: winget install Microsoft.PowerShell --accept-package-agreements --accept-source-agreements --disable-interactivity --silent
@@ -423,8 +409,7 @@ jobs:
 
       - name: Zip artifact
         shell: pwsh
-        run: |
-          Compress-Archive -Path artifact-download\* -DestinationPath ninjaguardian-${{ vars.DLLNAME_NO_EXT }}-${{ env.DLLVERSION }}.zip
+        run: Compress-Archive -Path artifact-download\* -DestinationPath ninjaguardian-${{ vars.DLLNAME_NO_EXT }}-${{ env.DLLVERSION }}.zip
 
       - name: Extract changelog for release
         shell: pwsh
