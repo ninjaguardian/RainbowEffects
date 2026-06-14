@@ -228,16 +228,6 @@ jobs:
         shell: pwsh
         run: Remove-Item steamcmdstuff -Recurse -Force
 
-      # TODO: Remove install entirely when gh actions uses a powershell with .net 10
-      - name: Install Powershell
-        shell: pwsh
-        run: |
-          winget install Microsoft.PowerShell --accept-package-agreements --accept-source-agreements --disable-interactivity --silent
-          if ($LASTEXITCODE -eq 1) {
-            Write-Host "Winget returned exit code 1 (ignoring)."
-            exit 0
-          }
-
       - name: Install 7z
         shell: pwsh
         run: |
@@ -252,6 +242,12 @@ jobs:
           msiexec /i $msi /quiet /norestart
           Write-Host "Installed 7z"
 
+      # TODO: Remove install entirely when gh actions uses a powershell with .net 10
+      - name: Install Powershell
+        shell: pwsh
+        continue-on-error: true
+        run: winget install Microsoft.PowerShell --accept-package-agreements --accept-source-agreements --disable-interactivity --silent
+
       - name: Checkout assemblies
         uses: actions/checkout@v6
         with:
@@ -259,10 +255,6 @@ jobs:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           path: il2cppassembliesrepo
           sparse-checkout: ${{ env.RUMBLEVER }}
-
-      - name: Setup powershell
-        shell: pwsh
-        run: echo "C:\Program Files\PowerShell" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Unpack assembly
         shell: pwsh
