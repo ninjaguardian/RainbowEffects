@@ -1,10 +1,10 @@
 {
     "name": "RainbowGuard",
-    "version_number": "2.0.0",
+    "version_number": "2.1.0",
     "website_url": "https://github.com/ninjaguardian/RainbowGuard",
     "description": "Changes the color of the guard effect",
     "dependencies": [
-        "LavaGang-MelonLoader-0.7.3",
+        "LavaGang-MelonLoader-0.7.2",
         "UlvakSkillz-RumbleModdingAPI-5.3.0"
     ]
 }

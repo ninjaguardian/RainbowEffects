@@ -16,7 +16,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/ninjaguardian/RainbowGuard</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<VersionPrefix>2.0.0</VersionPrefix>
+		<VersionPrefix>2.1.0</VersionPrefix>
 		<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 		<FileVersion>$(VersionPrefix).0</FileVersion>
 		<PackageIcon>icon.png</PackageIcon>
@@ -70,6 +70,10 @@
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="..\Resources\rainbowGuard" />
 	</ItemGroup>
 
 	<ItemGroup>

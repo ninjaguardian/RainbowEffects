@@ -1,4 +1,3 @@
-# NOTE: This contains RainbowGuard only code (check for "NOTE: RainbowGuard only")
 name: Build, Release, and Version Check
 
 permissions:
@@ -376,7 +375,6 @@ jobs:
           Copy-Item -Path icon.png -Destination $binPath\artifactsetup
           Copy-Item -Path LICENSE.txt -Destination $binPath\artifactsetup
           Copy-Item -Path manifest.json -Destination $binPath\artifactsetup
-          Copy-Item -Path UserData -Destination $binPath\artifactsetup -Recurse   # NOTE: RainbowGuard only
           Write-Output "BINPATH=$binPath" >> $env:GITHUB_ENV
           ls -R $binPath\artifactsetup
 

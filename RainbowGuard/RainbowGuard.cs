@@ -1,8 +1,6 @@
 ﻿using System;
 using MelonLoader;
-using MelonLoader.Utils;
 using RainbowGuard;
-using System.IO;
 using UnityEngine;
 
 #region Assemblies
@@ -31,11 +29,11 @@ namespace RainbowGuard
         /// <summary>
         /// Mod version.
         /// </summary>
-        public const string ModVersion = "2.0.0";
+        public const string ModVersion = "2.1.0";
         /// <summary>
         /// MelonLoader Version.
         /// </summary>
-        public const string MLVersion = "0.7.3";
+        public const string MLVersion = "0.7.2";
     }
     #endregion
 
@@ -51,8 +49,9 @@ namespace RainbowGuard
         /// <inheritdoc/>
         public override void OnLateInitializeMelon()
         {
-            Shader rainbowGuard = RumbleModdingAPI.RMAPI.AssetBundles.LoadAssetFromFile<Shader>(
-                Path.Combine(MelonEnvironment.UserDataDirectory, RainbowGuardModInfo.ModName, "rainbowGuard"),
+            Shader rainbowGuard = RumbleModdingAPI.RMAPI.AssetBundles.LoadAssetFromStream<Shader>(
+                this,
+                "RainbowGuard.rainbowGuard",
                 "guard.shader"
             );
             rainbowGuard.hideFlags = HideFlags.HideAndDontSave;
