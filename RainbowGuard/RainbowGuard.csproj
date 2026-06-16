@@ -4,7 +4,6 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
 		<Company>$(Authors)</Company>
 		<Title>Rainbow Guard</Title>
@@ -17,7 +16,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/ninjaguardian/RainbowGuard</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<VersionPrefix>1.0.0</VersionPrefix>
+		<VersionPrefix>2.0.0</VersionPrefix>
 		<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 		<FileVersion>$(VersionPrefix).0</FileVersion>
 		<PackageIcon>icon.png</PackageIcon>
@@ -74,8 +73,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Reference Include="Il2CppInterop.Runtime">
+			<HintPath>$(LibsDirPath)\MelonLoader\net6\Il2CppInterop.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2Cppmscorlib">
+			<HintPath>$(LibsDirPath)\MelonLoader\Il2CppAssemblies\Il2Cppmscorlib.dll</HintPath>
+		</Reference>
 		<Reference Include="MelonLoader">
 			<HintPath>$(LibsDirPath)\MelonLoader\net6\MelonLoader.dll</HintPath>
+		</Reference>
+		<Reference Include="RumbleModdingAPI">
+			<HintPath>$(LibsDirPath)\Mods\RumbleModdingAPI.dll</HintPath>
 		</Reference>
 		<Reference Include="UnityEngine.CoreModule">
 		    <HintPath>$(LibsDirPath)\MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll</HintPath>
