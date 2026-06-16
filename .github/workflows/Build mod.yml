@@ -92,7 +92,7 @@ jobs:
       - name: Get deps hash
         shell: pwsh
         run: |
-          $dependencies = jq -r '.dependencies | join("\n")'
+          $dependencies = jq -r '.dependencies | join("\n")' manifest.json
 
           $bytes = [System.Text.Encoding]::UTF8.GetBytes($dependencies)
           $hash = [System.Security.Cryptography.SHA256]::Create().ComputeHash($bytes)
@@ -121,7 +121,6 @@ jobs:
             $user = $parts[0]; $pkg = $parts[1]; $ver = $parts[2]
             $url = "https://thunderstore.io/package/download/$user/$pkg/$ver"
             $out = Join-Path $env:LIBSDIRPATH "$($user)-$($pkg)-$($ver).zip"
-            Write-Host "Fetching $url → $out"
             Invoke-WebRequest -Uri $url -OutFile $out
           }
 
