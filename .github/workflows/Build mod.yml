@@ -30,12 +30,12 @@ jobs:
 
       - name: Get version from manifest
         id: setversion
-        shell: pwsh
+        shell: bash
         run: |
-          $version = (Get-Content manifest.json | ConvertFrom-Json).version_number
-          Write-Output "VERSIONNUM=$version" >> $env:GITHUB_ENV
-          Write-Output "dllversion=$version" >> $env:GITHUB_OUTPUT
-          Write-Host "DLLVERSION=$version"
+          version=$(jq -r '.version_number' manifest.json)
+          echo "VERSIONNUM=$version" >> $GITHUB_ENV
+          echo "dllversion=$version" >> $GITHUB_OUTPUT
+          echo "DLLVERSION=$version"
 
       - name: Check .csproj
         shell: bash
@@ -92,11 +92,12 @@ jobs:
       - name: Get deps hash
         shell: pwsh
         run: |
-          $dependencies = (Get-Content manifest.json | ConvertFrom-Json).dependencies -join "`n"
+          $dependencies = jq -r '.dependencies | to_entries | sort_by(.key) | map("\(.key)=\(.value)") | join("`n")' manifest.json
+
           $bytes = [System.Text.Encoding]::UTF8.GetBytes($dependencies)
-          $memoryStream = [System.IO.MemoryStream]::new($bytes)
-          $hash = Get-FileHash -InputStream $memoryStream -Algorithm SHA256
-          $lowerhash = $hash.Hash.ToLower()
+          $hash = [System.Security.Cryptography.SHA256]::Create().ComputeHash($bytes)
+          $lowerhash = [BitConverter]::ToString($hash).Replace("-", "").ToLowerInvariant()
+
           Write-Output "DEPSHASH=$lowerhash" >> $env:GITHUB_ENV
           Write-Host "DEPSHASH=$lowerhash"
           Write-Host "Dependencies:`n$dependencies"
@@ -113,7 +114,7 @@ jobs:
         if: steps.cache-deps.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-          $deps = (Get-Content manifest.json | ConvertFrom-Json).dependencies
+          deps=$(jq -r '.dependencies[]' manifest.json)
           New-Item -ItemType Directory -Force -Path $env:LIBSDIRPATH | Out-Null
           foreach ($dep in $deps) {
             $parts = $dep -split '-'
