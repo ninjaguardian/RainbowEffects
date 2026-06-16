@@ -56,6 +56,9 @@ namespace RainbowGuard
 
         /// <inheritdoc/>
         public override void OnEarlyInitializeMelon() {
+            if (_didLoad)
+                return;
+
             // TODO: what about d3d12?
             if (SystemInfo.graphicsDeviceType != UnityEngine.Rendering.GraphicsDeviceType.Direct3D11)
             {
@@ -407,17 +410,6 @@ namespace RainbowGuard
 #if PRINT_CB
             PrintConstantBuffers(shaderBytecode, bytecodeLength);
 #endif
-
-            if (shaderBytecode == null)
-            {
-                return _hookInstance!.Trampoline(
-                    device,
-                    shaderBytecode,
-                    bytecodeLength,
-                    classLinkage,
-                    pixelShader
-                );
-            }
 
             if
             (

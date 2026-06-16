@@ -74,9 +74,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="0Harmony">
-			<HintPath>$(LibsDirPath)\MelonLoader\net6\0Harmony.dll</HintPath>
-		</Reference>
 		<Reference Include="MelonLoader">
 			<HintPath>$(LibsDirPath)\MelonLoader\net6\MelonLoader.dll</HintPath>
 		</Reference>
