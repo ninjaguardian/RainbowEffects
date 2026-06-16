@@ -92,7 +92,7 @@ jobs:
       - name: Get deps hash
         shell: pwsh
         run: |
-          $dependencies = jq -r '.dependencies | to_entries | sort_by(.key) | map("\(.key)=\(.value)") | join("`n")' manifest.json
+          $dependencies = jq -r '.dependencies | join("\n")'
 
           $bytes = [System.Text.Encoding]::UTF8.GetBytes($dependencies)
           $hash = [System.Security.Cryptography.SHA256]::Create().ComputeHash($bytes)
@@ -114,7 +114,7 @@ jobs:
         if: steps.cache-deps.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-          deps=$(jq -r '.dependencies[]' manifest.json)
+          $deps = jq -r '.dependencies[]' manifest.json
           New-Item -ItemType Directory -Force -Path $env:LIBSDIRPATH | Out-Null
           foreach ($dep in $deps) {
             $parts = $dep -split '-'
