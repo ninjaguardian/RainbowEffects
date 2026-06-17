@@ -1,6 +1,6 @@
 {
     "name": "RainbowGuard",
-    "version_number": "2.1.0",
+    "version_number": "3.0.0",
     "website_url": "https://github.com/ninjaguardian/RainbowGuard",
     "description": "Changes the color of the guard effect",
     "dependencies": [

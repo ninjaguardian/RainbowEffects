@@ -1,6 +1,7 @@
-﻿using System;
-using MelonLoader;
+﻿using MelonLoader;
 using RainbowGuard;
+using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 #region Assemblies
@@ -29,7 +30,7 @@ namespace RainbowGuard
         /// <summary>
         /// Mod version.
         /// </summary>
-        public const string ModVersion = "2.1.0";
+        public const string ModVersion = "3.0.0";
         /// <summary>
         /// MelonLoader Version.
         /// </summary>
@@ -43,33 +44,49 @@ namespace RainbowGuard
     public class RainbowGuard : MelonMod
     {
         private static readonly int ShaderID = Shader.PropertyToID("rainbowGuard");
+        private static readonly int Shader2ID = Shader.PropertyToID("rainbowGuard2");
         private const float Phase120 = (float)(2d * Math.PI / 3d);
         private const float Phase240 = (float)(4d * Math.PI / 3d);
 
         /// <inheritdoc/>
         public override void OnLateInitializeMelon()
         {
-            Shader rainbowGuard = RumbleModdingAPI.RMAPI.AssetBundles.LoadAssetFromStream<Shader>(
+            // TODO: maybe make the PS find the cb instead of using cb0 (like the VS)
+            AssetBundle assetBundle = RumbleModdingAPI.RMAPI.AssetBundles.LoadAssetBundleFromStream(
                 this,
-                "RainbowGuard.rainbowGuard",
-                "guard.shader"
+                "RainbowGuard.rainbowGuard"
             );
+            Shader rainbowGuard = assetBundle.LoadAsset<Shader>("guard.shader");
+            Shader rainbowGuard2 = assetBundle.LoadAsset<Shader>("guard2.shader");
+            assetBundle.Unload(false);
+
             rainbowGuard.hideFlags = HideFlags.HideAndDontSave;
+            rainbowGuard2.hideFlags = HideFlags.HideAndDontSave;
 
             foreach (Material mat in Resources.FindObjectsOfTypeAll<Material>())
-                if (mat?.name == "Hidden/VFX/Guardstone VFX/System/Output Particle Shader Graph Quad - Unlit")
+            {
+                if (mat == null)
+                    continue;
+
+                if (mat.name == "Hidden/VFX/Guardstone VFX/System/Output Particle Shader Graph Quad - Unlit")
                     mat.shader = rainbowGuard;
+                else if (mat.name == "Hidden/VFX/Guardstone VFX/System (1)/Output Particle Unlit Quad")
+                    mat.shader = rainbowGuard2;
+            }
         }
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void OnUpdate()
         {
-            Shader.SetGlobalVector(ShaderID, new Vector4(
+            Vector4 v = new(
                 Mathf.Sin(Time.time) * 0.5f + 0.5f,
                 Mathf.Sin(Time.time + Phase120) * 0.5f + 0.5f,
                 Mathf.Sin(Time.time + Phase240) * 0.5f + 0.5f,
                 0
-            ));
+            );
+            Shader.SetGlobalVector(ShaderID, v);
+            Shader.SetGlobalVector(Shader2ID, v);
         }
     }
 }

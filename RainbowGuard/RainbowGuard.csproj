@@ -16,7 +16,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/ninjaguardian/RainbowGuard</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<VersionPrefix>2.1.0</VersionPrefix>
+		<VersionPrefix>3.0.0</VersionPrefix>
 		<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 		<FileVersion>$(VersionPrefix).0</FileVersion>
 		<PackageIcon>icon.png</PackageIcon>
@@ -88,6 +88,9 @@
 		</Reference>
 		<Reference Include="RumbleModdingAPI">
 			<HintPath>$(LibsDirPath)\Mods\RumbleModdingAPI.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.AssetBundleModule">
+			<HintPath>$(LibsDirPath)\MelonLoader\Il2CppAssemblies\UnityEngine.AssetBundleModule.dll</HintPath>
 		</Reference>
 		<Reference Include="UnityEngine.CoreModule">
 		    <HintPath>$(LibsDirPath)\MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll</HintPath>
