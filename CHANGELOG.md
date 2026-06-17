@@ -1,3 +1,6 @@
+## v3.1.0
+- Add config (UIFramework)
+
 ## v3.0.1
 - Shaders request large enough buffers
 

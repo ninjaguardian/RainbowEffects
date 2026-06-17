@@ -19,6 +19,7 @@ using UnityEngine;
 
 [assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.IL2CPP)]
 [assembly: VerifyLoaderVersion(RainbowGuardModInfo.MLVersion, true)]
+[assembly: MelonOptionalDependencies(UIFramework.BuildInfo.Name)]
 #endregion
 
 namespace RainbowGuard
@@ -36,7 +37,7 @@ namespace RainbowGuard
         /// <summary>
         /// Mod version.
         /// </summary>
-        public const string ModVersion = "3.0.1";
+        public const string ModVersion = "3.1.0";
         /// <summary>
         /// MelonLoader Version.
         /// </summary>
