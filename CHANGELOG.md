@@ -1,3 +1,6 @@
+## v3.0.1
+- Shaders request large enough buffers
+
 ## v3.0.0
 - Outer particles also change colors
 

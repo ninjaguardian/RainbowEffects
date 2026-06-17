@@ -16,7 +16,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/ninjaguardian/RainbowGuard</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<VersionPrefix>3.0.0</VersionPrefix>
+		<VersionPrefix>3.0.1</VersionPrefix>
 		<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 		<FileVersion>$(VersionPrefix).0</FileVersion>
 		<PackageIcon>icon.png</PackageIcon>
@@ -96,5 +96,7 @@
 		    <HintPath>$(LibsDirPath)\MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll</HintPath>
 		</Reference>
 	</ItemGroup>
+
+	<ProjectExtensions><VisualStudio><UserProperties _1_1_4manifest_1json__JsonSchema="https://gist.github.com/ChrisFeline/dcbe4871b58edc4fde286ebf8bdef3a4" /></VisualStudio></ProjectExtensions>
 
 </Project>

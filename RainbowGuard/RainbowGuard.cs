@@ -30,7 +30,7 @@ namespace RainbowGuard
         /// <summary>
         /// Mod version.
         /// </summary>
-        public const string ModVersion = "3.0.0";
+        public const string ModVersion = "3.0.1";
         /// <summary>
         /// MelonLoader Version.
         /// </summary>
