@@ -10,12 +10,13 @@ This mod lets you change the color of the guard effect.
 
 ## Instructions
 1. Install [MelonLoader](https://github.com/LavaGang/MelonLoader)
-2. Run RUMBLE without mods
-3. Drop Mods from .zip into RUMBLE's installation folder
-4. Play RUMBLE!
+2. Install [RumbleModdingAPI](https://thunderstore.io/c/rumble/p/UlvakSkillz/RumbleModdingAPI)
+3. Install [UIFramework](https://thunderstore.io/c/rumble/p/Reverb_and___and_Spice/UIFramework) (Optional, allows editing config in game)
+4. Drop folders from RainbowGuard.zip into RUMBLE's installation folder
+5. Play RUMBLE!
 
 ## Help And Other Resources
-Get help and find other resources in the [Modding Discord](https://discord.gg/fsbcnZgzfa)
+Get help and find other resources in the [Modding Discord](https://discord.gg/qjWMy3DJsN)
 
 
-[![CC0-1.0 License](https://img.shields.io/badge/License-CC0_1.0_Universal-green.svg)](https://github.com/ninjaguardian/HealthDisplayWithFont?tab=CC0-1.0-1-ov-file)
+[![CC0-1.0 License](https://img.shields.io/badge/License-CC0_1.0_Universal-green.svg)](https://github.com/ninjaguardian/RainbowGuard?tab=CC0-1.0-1-ov-file)
