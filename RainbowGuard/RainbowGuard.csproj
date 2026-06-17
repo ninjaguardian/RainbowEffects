@@ -89,6 +89,9 @@
 		<Reference Include="RumbleModdingAPI">
 			<HintPath>$(LibsDirPath)\Mods\RumbleModdingAPI.dll</HintPath>
 		</Reference>
+		<Reference Include="UIFramework">
+			<HintPath>$(LibsDirPath)\Mods\UIFramework.dll</HintPath>
+		</Reference>
 		<Reference Include="UnityEngine.AssetBundleModule">
 			<HintPath>$(LibsDirPath)\MelonLoader\Il2CppAssemblies\UnityEngine.AssetBundleModule.dll</HintPath>
 		</Reference>
@@ -97,6 +100,6 @@
 		</Reference>
 	</ItemGroup>
 
-	<ProjectExtensions><VisualStudio><UserProperties _1_1_4manifest_1json__JsonSchema="https://gist.github.com/ChrisFeline/dcbe4871b58edc4fde286ebf8bdef3a4" /></VisualStudio></ProjectExtensions>
+	<ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 
 </Project>
