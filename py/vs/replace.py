@@ -3,7 +3,6 @@ import struct
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Tuple
 import common
 
 INPUT = common.DIR / "decompressed.bin"
@@ -22,7 +21,7 @@ LOAD_BYTES = bytes.fromhex("".join([
 TARGET_BUFFER_IDX = 1
 
 
-def inc_dcl_temps(code: str) -> Tuple[str, int]:
+def inc_dcl_temps(code: str) -> tuple[str, int]:
     new_r = None
 
     def repl(match: re.Match) -> str:
