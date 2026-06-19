@@ -70,10 +70,10 @@
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
-	</ItemGroup>
-
-	<ItemGroup>
-		<EmbeddedResource Include="..\Resources\rainbowGuard" />
+		<EmbeddedResource Include="..\Resources\rainbowGuard">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>
