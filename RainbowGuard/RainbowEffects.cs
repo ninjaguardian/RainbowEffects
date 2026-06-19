@@ -8,10 +8,10 @@ using System.Runtime.CompilerServices;
 using UIFramework;
 using UIFramework.UiExtensions;
 using UnityEngine;
-using BuildInfo = RainbowGuard.BuildInfo;
+using BuildInfo = RainbowEffects.BuildInfo;
 
 #region Assemblies
-[assembly: MelonInfo(typeof(RainbowGuard.RainbowGuard), BuildInfo.ModName, BuildInfo.ModVersion, BuildInfo.Author, BuildInfo.DownloadLink)]
+[assembly: MelonInfo(typeof(RainbowEffects.RainbowEffects), BuildInfo.ModName, BuildInfo.ModVersion, BuildInfo.Author, BuildInfo.DownloadLink)]
 [assembly: MelonGame("Buckethead Entertainment", "RUMBLE")]
 
 [assembly: MelonColor(255, 0, 160, 230)]
@@ -22,9 +22,9 @@ using BuildInfo = RainbowGuard.BuildInfo;
 [assembly: MelonOptionalDependencies(UIFramework.BuildInfo.Name)]
 #endregion
 
-namespace RainbowGuard
+namespace RainbowEffects
 {
-    #region RainbowGuardModInfo
+    #region RainbowEffectsModInfo
     /// <summary>
     /// Contains mod info
     /// </summary>
@@ -33,11 +33,11 @@ namespace RainbowGuard
         /// <summary>
         /// Mod name
         /// </summary>
-        public const string ModName = "RainbowGuard";
+        public const string ModName = "RainbowEffects";
         /// <summary>
         /// Mod version
         /// </summary>
-        public const string ModVersion = "3.1.1";
+        public const string ModVersion = "1.0.0";
         /// <summary>
         /// MelonLoader Version
         /// </summary>
@@ -49,7 +49,7 @@ namespace RainbowGuard
         /// <summary>
         /// Mod download link
         /// </summary>
-        public const string DownloadLink = "https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowGuard";
+        public const string DownloadLink = "https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowEffects";
         /// <summary>
         /// Config file name
         /// </summary>
@@ -60,8 +60,7 @@ namespace RainbowGuard
     /// <summary>
     /// The main class
     /// </summary>
-    [Obsolete("RainbowGuard has been replaced by RainbowEffects")]
-    public class RainbowGuard : MelonMod
+    public class RainbowEffects : MelonMod
     {
         private const float Phase120 = (float)(2d * Math.PI / 3d);
         private const float Phase240 = (float)(4d * Math.PI / 3d);
@@ -72,7 +71,7 @@ namespace RainbowGuard
             // TODO: maybe make the PS find the cb instead of using cb0 (like the VS)
             AssetBundle assetBundle = RumbleModdingAPI.RMAPI.AssetBundles.LoadAssetBundleFromStream(
                 this,
-                "RainbowGuard.rainbowGuard"
+                "RainbowEffects.rainbowGuard"
             );
             Shader rainbowGuard = assetBundle.LoadAsset<Shader>("guard.shader");
             Shader rainbowGuard2 = assetBundle.LoadAsset<Shader>("guard2.shader");
@@ -129,7 +128,6 @@ namespace RainbowGuard
         /// <inheritdoc/>
         public override void OnInitializeMelon()
         {
-            MelonLogger.Error("RainbowGuard has been replaced by RainbowEffects at https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowEffects/");
             bool uiPresent = RegisteredMelons.Any(m => m.Info.Name == UIFramework.BuildInfo.Name);
             Effect.UIPresent = uiPresent;
 
@@ -142,10 +140,6 @@ namespace RainbowGuard
             if (uiPresent)
                 RegisterUI();
         }
-
-        /// <inheritdoc/>
-        public override void OnEarlyInitializeMelon()
-            => MelonLogger.Error("RainbowGuard has been replaced by RainbowEffects at https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowEffects/");
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void RegisterUI()
@@ -185,17 +179,17 @@ namespace RainbowGuard
 
             string lowName = name.ToLower();
 
-            Category = RainbowGuard.CreateCategory(name.Replace(" ", null), name);
+            Category = RainbowEffects.CreateCategory(name.Replace(" ", null), name);
 
-            Speed = RainbowGuard.CreateEntry(Category, nameof(Speed), 1f, "Speed", "Speed of the rainbow");
-            Offset = RainbowGuard.CreateEntry(Category, nameof(Offset), 0f, "Offset", "Offset of the rainbow");
+            Speed = RainbowEffects.CreateEntry(Category, nameof(Speed), 1f, "Speed", "Speed of the rainbow");
+            Offset = RainbowEffects.CreateEntry(Category, nameof(Offset), 0f, "Offset", "Offset of the rainbow");
 
-            Color = RainbowGuard.CreateEntry(Category, nameof(Color), new Vector3(1f, 0.205078766f, 0f), "Color", "The color of the " + lowName, new VectorRange(0f, 1f));
+            Color = RainbowEffects.CreateEntry(Category, nameof(Color), new Vector3(1f, 0.205078766f, 0f), "Color", "The color of the " + lowName, new VectorRange(0f, 1f));
             Color.OnEntryValueChanged.Subscribe((_, newColor) =>
                 SetShader(newColor)
             );
 
-            Mode = RainbowGuard.CreateEntry(Category, nameof(Mode), ColorMode.Rainbow, "Mode", "The color mode of the " + lowName, UIPresent ? Ui() : null);
+            Mode = RainbowEffects.CreateEntry(Category, nameof(Mode), ColorMode.Rainbow, "Mode", "The color mode of the " + lowName, UIPresent ? Ui() : null);
             Mode.OnEntryValueChanged.Subscribe((_, newMode) => {
                 if (newMode == ColorMode.Static)
                     SetShader(Color.Value);

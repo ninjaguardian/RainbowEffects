@@ -6,17 +6,17 @@
 		<Nullable>enable</Nullable>
 
 		<Company>$(Authors)</Company>
-		<Title>Rainbow Guard</Title>
+		<Title>Rainbow Effects</Title>
 		<Authors>ninjaguardian</Authors>
-		<Description>Changes the color of the guard effect</Description>
+		<Description>Changes the colors of various effects</Description>
 		<Copyright>Copyright © 2026 ninjaguardian</Copyright>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<RepositoryUrl>https://github.com/ninjaguardian/RainbowGuard</RepositoryUrl>
+		<RepositoryUrl>https://github.com/ninjaguardian/RainbowEffects</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<VersionPrefix>3.1.1</VersionPrefix>
+		<VersionPrefix>1.0.0</VersionPrefix>
 		<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 		<FileVersion>$(VersionPrefix).0</FileVersion>
 		<PackageIcon>icon.png</PackageIcon>
@@ -24,7 +24,7 @@
 		<Platforms>x64</Platforms>
 		<PlatformTarget>x64</PlatformTarget>
 		<Prefer32Bit>False</Prefer32Bit>
-		<PackageProjectUrl>https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowGuard</PackageProjectUrl>
+		<PackageProjectUrl>https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowEffects</PackageProjectUrl>
 		<SelfContained>false</SelfContained>
 		<Optimize>True</Optimize>
 		<WarningLevel>9999</WarningLevel>

@@ -1,9 +1,8 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36401.2 d17.14
+# Visual Studio Version 18
+VisualStudioVersion = 18.7.11911.148 stable
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{42AF76D8-AC6E-41D0-A578-3D7C258AF9FA}") = "RainbowGuard", "RainbowGuard\RainbowGuard.csproj", "{9B106364-42FA-4DDB-89AB-593558E5BA34}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RainbowEffects", "RainbowEffects\RainbowEffects.csproj", "{9B106364-42FA-4DDB-89AB-593558E5BA34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
