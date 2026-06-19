@@ -3,7 +3,6 @@ using MelonLoader.Preferences;
 using MelonLoader.Utils;
 using System;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using UIFramework;
 using UIFramework.UiExtensions;
@@ -19,12 +18,12 @@ using BuildInfo = RainbowEffects.BuildInfo;
 
 [assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.IL2CPP)]
 [assembly: VerifyLoaderVersion(BuildInfo.MLVersion, true)]
-[assembly: MelonOptionalDependencies(UIFramework.BuildInfo.Name)]
+[assembly: MelonIncompatibleAssemblies("RainbowGuard")]
 #endregion
 
 namespace RainbowEffects
 {
-    #region RainbowEffectsModInfo
+    #region BuildInfo
     /// <summary>
     /// Contains mod info
     /// </summary>
@@ -68,7 +67,6 @@ namespace RainbowEffects
         /// <inheritdoc/>
         public override void OnLateInitializeMelon()
         {
-            // TODO: maybe make the PS find the cb instead of using cb0 (like the VS)
             AssetBundle assetBundle = RumbleModdingAPI.RMAPI.AssetBundles.LoadAssetBundleFromStream(
                 this,
                 "RainbowEffects.rainbowGuard"
@@ -128,22 +126,14 @@ namespace RainbowEffects
         /// <inheritdoc/>
         public override void OnInitializeMelon()
         {
-            bool uiPresent = RegisteredMelons.Any(m => m.Info.Name == UIFramework.BuildInfo.Name);
-            Effect.UIPresent = uiPresent;
-
             if (!Directory.Exists(ConfigDir))
                 Directory.CreateDirectory(ConfigDir);
 
             _mainEffect = new Effect("Main Effect", "rainbowGuard");
             _particles = new Effect("Particles", "rainbowGuard2");
 
-            if (uiPresent)
-                RegisterUI();
+            UI.RegisterMelon(this, _mainEffect!.Category, _particles!.Category);
         }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void RegisterUI()
-            => UI.RegisterMelon(this, _mainEffect!.Category, _particles!.Category);
 
         internal static MelonPreferences_Category CreateCategory(string categoryID, string categoryName)
         {
@@ -164,7 +154,6 @@ namespace RainbowEffects
 
     internal class Effect
     {
-        public static bool UIPresent;
         private readonly int _shaderID;
         internal readonly MelonPreferences_Category Category;
         internal readonly MelonPreferences_Entry<float> Speed;
@@ -189,7 +178,7 @@ namespace RainbowEffects
                 SetShader(newColor)
             );
 
-            Mode = RainbowEffects.CreateEntry(Category, nameof(Mode), ColorMode.Rainbow, "Mode", "The color mode of the " + lowName, UIPresent ? Ui() : null);
+            Mode = RainbowEffects.CreateEntry(Category, nameof(Mode), ColorMode.Rainbow, "Mode", "The color mode of the " + lowName, new UserEditNotifier { OnUserEdit = ModeToggled });
             Mode.OnEntryValueChanged.Subscribe((_, newMode) => {
                 if (newMode == ColorMode.Static)
                     SetShader(Color.Value);
@@ -200,10 +189,6 @@ namespace RainbowEffects
                 SetShader(Color.Value);
         }
         
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private ValueValidator Ui()
-            => new UserEditNotifier { OnUserEdit = ModeToggled };
-
         internal void SetShader(Vector4 v)
             => Shader.SetGlobalVector(_shaderID, v);
 

@@ -6,12 +6,12 @@
 [![Thunderstore](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3.2.0/assets/cozy/documentation/website_vector.svg)](https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowEffects)
 
 ## What is this?
-This mod lets you change the color of the guard effect.
+This mod lets you change the colors of various effects.
 
 ## Instructions
 1. Install [MelonLoader](https://github.com/LavaGang/MelonLoader)
 2. Install [RumbleModdingAPI](https://thunderstore.io/c/rumble/p/UlvakSkillz/RumbleModdingAPI)
-3. Install [UIFramework](https://thunderstore.io/c/rumble/p/Reverb_and___and_Spice/UIFramework) (Optional, allows editing config in game)
+3. Install [UIFramework](https://thunderstore.io/c/rumble/p/Reverb_and___and_Spice/UIFramework)
 4. Drop folders from RainbowEffects.zip into RUMBLE's installation folder
 5. Play RUMBLE!
 
