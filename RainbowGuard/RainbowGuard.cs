@@ -69,7 +69,6 @@ namespace RainbowGuard
         /// <inheritdoc/>
         public override void OnLateInitializeMelon()
         {
-            MelonLogger.Warning("RainbowGuard has been replaced by RainbowEffects at https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowEffects/");
             // TODO: maybe make the PS find the cb instead of using cb0 (like the VS)
             AssetBundle assetBundle = RumbleModdingAPI.RMAPI.AssetBundles.LoadAssetBundleFromStream(
                 this,
@@ -130,7 +129,7 @@ namespace RainbowGuard
         /// <inheritdoc/>
         public override void OnInitializeMelon()
         {
-            MelonLogger.Warning("RainbowGuard has been replaced by RainbowEffects at https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowEffects/");
+            MelonLogger.Error("RainbowGuard has been replaced by RainbowEffects at https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowEffects/");
             bool uiPresent = RegisteredMelons.Any(m => m.Info.Name == UIFramework.BuildInfo.Name);
             Effect.UIPresent = uiPresent;
 
@@ -143,6 +142,10 @@ namespace RainbowGuard
             if (uiPresent)
                 RegisterUI();
         }
+
+        /// <inheritdoc/>
+        public override void OnEarlyInitializeMelon()
+            => MelonLogger.Error("RainbowGuard has been replaced by RainbowEffects at https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowEffects/");
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void RegisterUI()
