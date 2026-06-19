@@ -19,4 +19,4 @@ This mod lets you change the color of the guard effect.
 Get help and find other resources in the [Modding Discord](https://discord.gg/qjWMy3DJsN)
 
 
-[![CC0-1.0 License](https://img.shields.io/badge/License-CC0_1.0_Universal-green.svg)](https://github.com/ninjaguardian/RainbowGuard?tab=CC0-1.0-1-ov-file)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/ninjaguardian/RainbowGuard?tab=MIT-1-ov-file)

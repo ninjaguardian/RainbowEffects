@@ -7,10 +7,10 @@
 
 		<Company>$(Authors)</Company>
 		<Title>Rainbow Guard</Title>
-		<Authors>ninjaguardian (github)</Authors>
+		<Authors>ninjaguardian</Authors>
 		<Description>Changes the color of the guard effect</Description>
-		<Copyright>Copyright © 2026 ninjaguardian (github), This work is dedicated to the public domain under CC0 1.0.</Copyright>
-		<PackageLicenseExpression>CC0-1.0</PackageLicenseExpression>
+		<Copyright>Copyright © 2026 ninjaguardian</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
