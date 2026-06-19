@@ -37,7 +37,7 @@ namespace RainbowGuard
         /// <summary>
         /// Mod version
         /// </summary>
-        public const string ModVersion = "3.1.0";
+        public const string ModVersion = "3.1.1";
         /// <summary>
         /// MelonLoader Version
         /// </summary>
@@ -60,6 +60,7 @@ namespace RainbowGuard
     /// <summary>
     /// The main class
     /// </summary>
+    [Obsolete("RainbowGuard has been replaced by RainbowEffects")]
     public class RainbowGuard : MelonMod
     {
         private const float Phase120 = (float)(2d * Math.PI / 3d);
@@ -68,6 +69,7 @@ namespace RainbowGuard
         /// <inheritdoc/>
         public override void OnLateInitializeMelon()
         {
+            MelonLogger.Warning("RainbowGuard has been replaced by RainbowEffects at https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowEffects/");
             // TODO: maybe make the PS find the cb instead of using cb0 (like the VS)
             AssetBundle assetBundle = RumbleModdingAPI.RMAPI.AssetBundles.LoadAssetBundleFromStream(
                 this,
@@ -128,6 +130,7 @@ namespace RainbowGuard
         /// <inheritdoc/>
         public override void OnInitializeMelon()
         {
+            MelonLogger.Warning("RainbowGuard has been replaced by RainbowEffects at https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowEffects/");
             bool uiPresent = RegisteredMelons.Any(m => m.Info.Name == UIFramework.BuildInfo.Name);
             Effect.UIPresent = uiPresent;
 

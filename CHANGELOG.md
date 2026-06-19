@@ -1,3 +1,7 @@
+## v3.1.1
+- Add deprecation notice
+  - RainbowGuard has been replaced by [RainbowEffects](https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowEffects/) 
+
 ## v3.1.0
 - Add config ([UIFramework](https://thunderstore.io/c/rumble/p/Reverb_and___and_Spice/UIFramework/))
 

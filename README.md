@@ -1,3 +1,6 @@
+# RainbowGuard has been replaced by [RainbowEffects](https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowEffects/)
+#
+
 # Rainbow Guard
 ![Photo](https://raw.githubusercontent.com/ninjaguardian/RainbowGuard/master/icon.png)
 
