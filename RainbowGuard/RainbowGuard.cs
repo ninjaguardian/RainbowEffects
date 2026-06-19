@@ -1,7 +1,6 @@
 ﻿using MelonLoader;
 using MelonLoader.Preferences;
 using MelonLoader.Utils;
-using RainbowGuard;
 using System;
 using System.IO;
 using System.Linq;
@@ -9,16 +8,17 @@ using System.Runtime.CompilerServices;
 using UIFramework;
 using UIFramework.UiExtensions;
 using UnityEngine;
+using BuildInfo = RainbowGuard.BuildInfo;
 
 #region Assemblies
-[assembly: MelonInfo(typeof(RainbowGuard.RainbowGuard), RainbowGuardModInfo.ModName, RainbowGuardModInfo.ModVersion, "ninjaguardian", "https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowGuard")]
+[assembly: MelonInfo(typeof(RainbowGuard.RainbowGuard), BuildInfo.ModName, BuildInfo.ModVersion, BuildInfo.Author, BuildInfo.DownloadLink)]
 [assembly: MelonGame("Buckethead Entertainment", "RUMBLE")]
 
 [assembly: MelonColor(255, 0, 160, 230)]
 [assembly: MelonAuthorColor(255, 0, 160, 230)]
 
 [assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.IL2CPP)]
-[assembly: VerifyLoaderVersion(RainbowGuardModInfo.MLVersion, true)]
+[assembly: VerifyLoaderVersion(BuildInfo.MLVersion, true)]
 [assembly: MelonOptionalDependencies(UIFramework.BuildInfo.Name)]
 #endregion
 
@@ -26,31 +26,39 @@ namespace RainbowGuard
 {
     #region RainbowGuardModInfo
     /// <summary>
-    /// Contains mod info.
+    /// Contains mod info
     /// </summary>
-    public static class RainbowGuardModInfo
+    public static class BuildInfo
     {
         /// <summary>
-        /// Mod name.
+        /// Mod name
         /// </summary>
         public const string ModName = "RainbowGuard";
         /// <summary>
-        /// Mod version.
+        /// Mod version
         /// </summary>
         public const string ModVersion = "3.1.0";
         /// <summary>
-        /// MelonLoader Version.
+        /// MelonLoader Version
         /// </summary>
         public const string MLVersion = "0.7.2";
         /// <summary>
-        /// Config file name.
+        /// Mod author
+        /// </summary>
+        public const string Author = "ninjaguardian";
+        /// <summary>
+        /// Mod download link
+        /// </summary>
+        public const string DownloadLink = "https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowGuard";
+        /// <summary>
+        /// Config file name
         /// </summary>
         public const string ConfigFile = "config.cfg";
     }
     #endregion
 
     /// <summary>
-    /// The main class.
+    /// The main class
     /// </summary>
     public class RainbowGuard : MelonMod
     {
@@ -111,8 +119,8 @@ namespace RainbowGuard
             }
         }
 
-        private static readonly string ConfigDir = Path.Combine(MelonEnvironment.UserDataDirectory, RainbowGuardModInfo.ModName);
-        private static readonly string Config = Path.Combine(ConfigDir, RainbowGuardModInfo.ConfigFile);
+        private static readonly string ConfigDir = Path.Combine(MelonEnvironment.UserDataDirectory, BuildInfo.ModName);
+        private static readonly string Config = Path.Combine(ConfigDir, BuildInfo.ConfigFile);
 
         private Effect? _mainEffect;
         private Effect? _particles;
@@ -139,7 +147,7 @@ namespace RainbowGuard
 
         internal static MelonPreferences_Category CreateCategory(string categoryID, string categoryName)
         {
-            MelonPreferences_Category cat = MelonPreferences.CreateCategory(RainbowGuardModInfo.ModName + '_' + categoryID, categoryName);
+            MelonPreferences_Category cat = MelonPreferences.CreateCategory(BuildInfo.ModName + '_' + categoryID, categoryName);
             cat.SetFilePath(Config);
             return cat;
         }
