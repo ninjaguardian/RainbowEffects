@@ -19,6 +19,7 @@ using BuildInfo = RainbowEffects.BuildInfo;
 [assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.IL2CPP)]
 [assembly: VerifyLoaderVersion(BuildInfo.MLVersion, true)]
 [assembly: MelonIncompatibleAssemblies("RainbowGuard")]
+[assembly: UIInfo("Rainbow Effects")]
 #endregion
 
 namespace RainbowEffects
@@ -78,6 +79,15 @@ namespace RainbowEffects
             rainbowGuard.hideFlags = HideFlags.HideAndDontSave;
             rainbowGuard2.hideFlags = HideFlags.HideAndDontSave;
 
+            assetBundle = RumbleModdingAPI.RMAPI.AssetBundles.LoadAssetBundleFromStream(
+                this,
+                "RainbowEffects.boulderBall"
+            );
+            Shader boulderBall = assetBundle.LoadAsset<Shader>("boulderball.shader");
+            assetBundle.Unload(false);
+
+            boulderBall.hideFlags = HideFlags.HideAndDontSave;
+
             foreach (Material mat in Resources.FindObjectsOfTypeAll<Material>())
             {
                 if (mat == null)
@@ -87,6 +97,8 @@ namespace RainbowEffects
                     mat.shader = rainbowGuard;
                 else if (mat.name == "Hidden/VFX/Guardstone VFX/System (1)/Output Particle Unlit Quad")
                     mat.shader = rainbowGuard2;
+                else if (mat.name == "Hidden/VFX/Boulderball Scored/Reticle Ring/Output Particle Unlit Quad")
+                    mat.shader = boulderBall;
             }
         }
 
@@ -101,7 +113,7 @@ namespace RainbowEffects
                     Mathf.Sin(t) * 0.5f + 0.5f,
                     Mathf.Sin(t + Phase120) * 0.5f + 0.5f,
                     Mathf.Sin(t + Phase240) * 0.5f + 0.5f,
-                    0
+                    0f
                 ));
             }
 
@@ -112,7 +124,18 @@ namespace RainbowEffects
                     Mathf.Sin(t) * 0.5f + 0.5f,
                     Mathf.Sin(t + Phase120) * 0.5f + 0.5f,
                     Mathf.Sin(t + Phase240) * 0.5f + 0.5f,
-                    0
+                    0f
+                ));
+            }
+
+            if (_boulderBall!.Mode.Value == ColorMode.Rainbow)
+            {
+                float t = Time.time * _boulderBall.Speed.Value + _boulderBall.Offset.Value;
+                _boulderBall.SetShader(new Vector4(
+                    Mathf.Sin(t) * 0.5f + 0.5f,
+                    Mathf.Sin(t + Phase120) * 0.5f + 0.5f,
+                    Mathf.Sin(t + Phase240) * 0.5f + 0.5f,
+                    1f
                 ));
             }
         }
@@ -122,6 +145,7 @@ namespace RainbowEffects
 
         private Effect? _mainEffect;
         private Effect? _particles;
+        private Effect? _boulderBall;
 
         /// <inheritdoc/>
         public override void OnInitializeMelon()
@@ -129,10 +153,12 @@ namespace RainbowEffects
             if (!Directory.Exists(ConfigDir))
                 Directory.CreateDirectory(ConfigDir);
 
-            _mainEffect = new Effect("Main Effect", "rainbowGuard");
-            _particles = new Effect("Particles", "rainbowGuard2");
+            _mainEffect = new Effect("Guard Effect", "rainbowGuard", new Vector3(1f, 0.205078766f, 0f));
+            _particles = new Effect("Guard Particles", "rainbowGuard2", new Vector3(1f, 0.205078766f, 0f));
+            _boulderBall = new Effect("Fist Bump", "RainbowEffectsBoulderBall", new Vector3(1f, 0.830770f, 0.212231f));
+            _boulderBall.Mode.Description += "\n(These settings also applies to the scoring effect of the ball minigame in the park)";
 
-            UI.RegisterMelon(this, _mainEffect!.Category, _particles!.Category);
+            UI.RegisterMelon(this, _mainEffect.Category, _particles.Category, _boulderBall.Category);
         }
 
         internal static MelonPreferences_Category CreateCategory(string categoryID, string categoryName)
@@ -142,7 +168,7 @@ namespace RainbowEffects
             return cat;
         }
 
-        internal static MelonPreferences_Entry<T> CreateEntry<T>(MelonPreferences_Category category, string entryID, T defaultValue, string entryName, string description, ValueValidator? validator = null)
+        internal static MelonPreferences_Entry<T> CreateEntry<T>(MelonPreferences_Category category, string entryID, T defaultValue, string entryName, string? description = null, ValueValidator? validator = null)
             => category.CreateEntry(category.Identifier + '_' + entryID, defaultValue, entryName, description, validator: validator);
     }
 
@@ -161,7 +187,7 @@ namespace RainbowEffects
         internal readonly MelonPreferences_Entry<Vector3> Color;
         internal readonly MelonPreferences_Entry<ColorMode> Mode;
 
-        internal Effect(string name, string property)
+        internal Effect(string name, string property, Vector3 defaultColor)
         {
             // TODO: fix discard issues
             _shaderID = Shader.PropertyToID(property);
@@ -173,7 +199,7 @@ namespace RainbowEffects
             Speed = RainbowEffects.CreateEntry(Category, nameof(Speed), 1f, "Speed", "Speed of the rainbow");
             Offset = RainbowEffects.CreateEntry(Category, nameof(Offset), 0f, "Offset", "Offset of the rainbow");
 
-            Color = RainbowEffects.CreateEntry(Category, nameof(Color), new Vector3(1f, 0.205078766f, 0f), "Color", "The color of the " + lowName, new VectorRange(0f, 1f));
+            Color = RainbowEffects.CreateEntry(Category, nameof(Color), defaultColor, "Color", "The color of the " + lowName, new VectorRange(0f, 1f));
             Color.OnEntryValueChanged.Subscribe((_, newColor) =>
                 SetShader(newColor)
             );

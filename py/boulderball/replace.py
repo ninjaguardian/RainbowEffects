@@ -8,38 +8,11 @@ from common.common import DIR, DISASSEMBLE_EXE
 INPUT = DIR / "decompressed.bin"
 OUTPUT = DIR / "decompressed_mod.bin"
 
-LOAD = "l(1.000000,0.830770075,0.212230787,1.000000)"
-EXTRA_NOPS = 2
-LOAD_BYTES = bytes.fromhex("024000000000803f59ad543f0753593e0000803f")
-TARGET_BUFFER_IDX = 0
-
-
-def get_buffer(shdr_code: str) -> tuple[str, str]:
-    m = re.search(r"iadd\s+r\d+\.[xyzw],\s*r\d+\.[xyzw],\s*cb(\d+)\[0\]\.z", shdr_code)
-    assert m is not None
-
-    buffer_index = int(m.group(1))
-
-    m = re.search(rf"\bdcl_constantbuffer\s+CB{buffer_index}\[(\d+)\],\s*immediateIndexed\b", shdr_code)
-    assert m is not None
-
-    current_size = int(m.group(1))
-    required_size = TARGET_BUFFER_IDX + 1
-
-    buffer = f"cb{buffer_index}[{TARGET_BUFFER_IDX}]"
-
-    if current_size >= required_size:
-        print(f"Using buffer cb{buffer_index}[{current_size}]")
-        return shdr_code, buffer
-
-    shdr_code = (
-        shdr_code[:m.start(1)]
-        + str(required_size)
-        + shdr_code[m.end(1):]
-    )
-    print(f"Using buffer cb{buffer_index}[{current_size}] -> cb{buffer_index}[{required_size}]")
-
-    return shdr_code, buffer
+LOAD = r"mad o0\.xyz, r0\.wwww, r0\.xyzx, cb0\[\d+\]\.xyzx"
+TARGET = "mov o0.xyz, cb0[1]"
+EXTRA_NOPS = 4
+# LOAD_BYTES = bytes.fromhex("3200000a7220100000000000f60f100000000000460210000000000046822000000000002d000000")
+LOAD_BYTES = bytes.fromhex("3200000a7220100000000000f60f10000000000046021000000000004682200000000000")
 
 
 data = INPUT.read_bytes()
@@ -73,12 +46,9 @@ while True:
         patched = tmp / "shader_patched.asm"
 
         code = asm.read_text()
-        # print(code)
-        code, buffer_code = get_buffer(code)
-        code = code.replace(LOAD, buffer_code)
+        code = re.sub(LOAD, TARGET, code)
         code += "nop\n" * EXTRA_NOPS
         # print(code)
-        # code = code.replace(LOAD, "l(0.000000,1.000000,1.000000,1.000000)")
         patched.write_text(code)
 
         subprocess.run([DISASSEMBLE_EXE, "--copy-reflection", dxbc_path, "-S", "-V", "-a", str(patched)], check=True)

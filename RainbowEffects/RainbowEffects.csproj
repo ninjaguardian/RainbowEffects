@@ -74,6 +74,10 @@
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</EmbeddedResource>
+		<EmbeddedResource Include="..\Resources\boulderBall">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>
