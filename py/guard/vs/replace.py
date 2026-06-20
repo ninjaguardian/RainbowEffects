@@ -3,11 +3,10 @@ import struct
 import subprocess
 import tempfile
 from pathlib import Path
-from common.common import DIR, COMMON
+from common.common import DIR, DISASSEMBLE_EXE
 
 INPUT = DIR / "decompressed.bin"
 OUTPUT = DIR / "decompressed_mod.bin"
-DISASSEMBLE_EXE = COMMON / "HLSLDecompiler.exe"
 
 EXTRA_NOPS = 13
 EXTRA_NOPS2 = 18
@@ -182,6 +181,7 @@ while True:
     pos = start + total_size
     replaced += 1
 
+print(f"Replaced {replaced} matches")
 assert start_len == len(data), "Output data size is invalid"
 assert data.count(LOAD_BYTES) == replaced, "Not all matches replaced"
 

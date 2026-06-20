@@ -2,11 +2,10 @@ import struct
 import tempfile
 import subprocess
 from pathlib import Path
-from common.common import DIR, COMMON
+from common.common import DIR, DISASSEMBLE_EXE
 
 INPUT = DIR / "decompressed.bin"
 OUTPUT = DIR / "decompressed_mod.bin"
-DISASSEMBLE_EXE = COMMON / "HLSLDecompiler.exe"
 
 LOAD = "l(1.000000,0.205078766,0,0)"
 TARGET = "cb0[3]"
