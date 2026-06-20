@@ -1,9 +1,9 @@
-from pathlib import Path
 import lz4.block
+from .common import DIR
 
 
-def main(path: Path, decompressed_size: int):
-    with open(path / "compressed.bin", "rb") as f:
+def main(decompressed_size: int):
+    with open(DIR / "compressed.bin", "rb") as f:
         data = f.read()
 
     print(f"Compressed len: {len(data)}")
@@ -13,5 +13,5 @@ def main(path: Path, decompressed_size: int):
         uncompressed_size=decompressed_size
     )
 
-    with open(path / "decompressed.bin", "wb") as f:
+    with open(DIR / "decompressed.bin", "wb") as f:
         f.write(decompressed)

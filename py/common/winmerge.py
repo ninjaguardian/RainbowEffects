@@ -15,4 +15,5 @@ def convert(s: str) -> str:
     return "".join(out)
 
 
-print(convert(input("Data in:\n>")))
+if __name__ == "__main__":
+    print(convert(input("Data in:\n>")))

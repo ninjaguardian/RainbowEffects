@@ -3,11 +3,11 @@ import struct
 import subprocess
 import tempfile
 from pathlib import Path
-import common
+from common.common import DIR, COMMON
 
-INPUT = common.DIR / "decompressed.bin"
-OUTPUT = common.DIR / "decompressed_mod.bin"
-DISASSEMBLE_EXE = common.DIR.parent / "HLSLDecompiler.exe"
+INPUT = DIR / "decompressed.bin"
+OUTPUT = DIR / "decompressed_mod.bin"
+DISASSEMBLE_EXE = COMMON / "HLSLDecompiler.exe"
 
 EXTRA_NOPS = 13
 EXTRA_NOPS2 = 18

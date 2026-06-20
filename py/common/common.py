@@ -1,10 +1,4 @@
-import sys
 from pathlib import Path
-DIR = Path(__file__).parent
-sys.path.append(
-    str(
-        (
-            DIR / "../common"
-        ).resolve()
-    )
-)
+import __main__
+DIR = Path(__main__.__file__).parent
+COMMON = Path(__file__).parent
