@@ -6,7 +6,7 @@
 [![Thunderstore](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3.2.0/assets/cozy/documentation/website_vector.svg)](https://thunderstore.io/c/rumble/p/ninjaguardian/RainbowEffects)
 
 ## What is this?
-This mod lets you change the colors of various effects.
+This mod lets you change the colors of the guard shield (and the particles around it) and fistbumps (which also change the scoring effect for the hoop minigame).
 
 ## Instructions
 1. Install [MelonLoader](https://github.com/LavaGang/MelonLoader)
