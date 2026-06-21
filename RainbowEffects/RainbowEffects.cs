@@ -1,4 +1,5 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Il2CppRUMBLE.Managers;
 using MelonLoader;
 using MelonLoader.Preferences;
 using MelonLoader.Utils;
@@ -6,6 +7,7 @@ using RumbleModdingAPI.RMAPI;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using Il2CppRUMBLE.Pools;
 using UIFramework;
 using UIFramework.UiExtensions;
 using UnityEngine;
@@ -64,9 +66,9 @@ namespace RainbowEffects
     }
     #endregion
 
-    internal record RainbowEffectResource(Material Mat, Shader Original, Shader Rainbow)
+    internal record RainbowEffectsResource(Material Mat, Shader Original, Shader Rainbow)
     {
-        public RainbowEffectResource(Material mat, Shader rainbow) 
+        public RainbowEffectsResource(Material mat, Shader rainbow) 
             : this(mat, mat.shader, rainbow)
         {}
 
@@ -81,35 +83,25 @@ namespace RainbowEffects
     {
         private const float Phase120 = (float)(2d * Math.PI / 3d);
         private const float Phase240 = (float)(4d * Math.PI / 3d);
-        private VisualEffect? _guard;
+        //private VisualEffect? _guard;
 
-        /// <inheritdoc/>
-        public override void OnLateInitializeMelon()
+        private void Init(string sceneName)
         {
-            Actions.onMapInitialized += OnMapInit;
-
-            AssetBundle assetBundle = AssetBundles.LoadAssetBundleFromStream(
-                this,
-                "RainbowEffects.boulderBall"
-            );
-            Shader boulderBall = assetBundle.LoadAsset<Shader>("boulderball.shader");
-            assetBundle.Unload(false);
-
-            boulderBall.hideFlags = HideFlags.HideAndDontSave;
-
-            foreach (Material mat in Resources.FindObjectsOfTypeAll<Material>())
-                if (mat.name == "Hidden/VFX/Boulderball Scored/Reticle Ring/Output Particle Unlit Quad")
-                    mat.shader = boulderBall;
+            Actions.onMapInitialized -= Init;
+            // TODO: maybe make these methods take inputs and make them more general
+            InitGuardStone();
+            InitBoulderBall();
         }
 
-        private void OnMapInit(string _)
+        private void InitGuardStone()
         {
-            if (_guard != null)
-                return;
-
-            Transform? vfx = Calls.Players.GetLocalPlayerController().transform.Find("Guardstone_VFX");
+            // TODO: Only load when guard equipped (patch GuardStone.OnEquip or something)
+            PooledMonoBehaviour? vfx = PoolManager.Instance.GetPooledObject("Guardstone_VFX");
             if (vfx == null)
+            {
+                LoggerInstance.Error("Could not get Guardstone_VFX");
                 return;
+            }
 
             Il2CppReferenceArray<Material> mats = vfx.GetComponent<VFXRenderer>().sharedMaterials;
             if (mats.Length != 2)
@@ -129,48 +121,69 @@ namespace RainbowEffects
             rainbowGuard.hideFlags = HideFlags.HideAndDontSave;
             rainbowGuard2.hideFlags = HideFlags.HideAndDontSave;
 
-            _mainEffect!.Resource = new RainbowEffectResource(mats[0], rainbowGuard);
-            _particles!.Resource = new RainbowEffectResource(mats[1], rainbowGuard2);
+            _mainEffect!.Resource = new RainbowEffectsResource(mats[0], rainbowGuard);
+            _particles!.Resource = new RainbowEffectsResource(mats[1], rainbowGuard2);
 
             if (_mainEffect.Enabled.Value)
                 _mainEffect.Resource.SetRainbow();
             if (_particles.Enabled.Value)
                 _particles.Resource.SetRainbow();
 
-            _guard = vfx.GetComponent<VisualEffect>();
+            //_guard = vfx.GetComponent<VisualEffect>();
+        }
+
+        private void InitBoulderBall()
+        {
+            PooledMonoBehaviour? vfx = PoolManager.Instance.GetPooledObject("PlayerBoxInteractionVFX");
+            if (vfx == null)
+            {
+                LoggerInstance.Error("Could not get PlayerBoxInteractionVFX");
+                return;
+            }
+
+            Shader boulderBall = AssetBundles.LoadAssetFromStream<Shader>(
+                this,
+                "RainbowEffects.boulderBall",
+                "boulderball.shader"
+            );
+            boulderBall.hideFlags = HideFlags.HideAndDontSave;
+
+            _boulderBall!.Resource = new RainbowEffectsResource(vfx.GetComponent<VFXRenderer>().sharedMaterial, boulderBall);
+
+            if (_boulderBall.Enabled.Value)
+                _boulderBall.Resource.SetRainbow();
         }
 
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void OnUpdate()
         {
-            if (_guard?.aliveParticleCount > 0)
-            {
-                if (_mainEffect!.Enabled.Value && _mainEffect.Mode.Value == ColorMode.Rainbow)
-                {
-                    float t = Time.time * _mainEffect.Speed.Value + _mainEffect.Offset.Value;
-                    _mainEffect.SetVector(new Vector4(
-                        Mathf.Sin(t) * 0.5f + 0.5f,
-                        Mathf.Sin(t + Phase120) * 0.5f + 0.5f,
-                        Mathf.Sin(t + Phase240) * 0.5f + 0.5f,
-                        0f
-                    ));
-                }
+            // TODO: VisualEffect.time over Time.time?
+            // TODO: Only update while playing (VisualEffect.aliveParticleCount > 0)
 
-                if (_particles!.Enabled.Value && _particles.Mode.Value == ColorMode.Rainbow)
-                {
-                    float t = Time.time * _particles.Speed.Value + _particles.Offset.Value;
-                    _particles.SetVector(new Vector4(
-                        Mathf.Sin(t) * 0.5f + 0.5f,
-                        Mathf.Sin(t + Phase120) * 0.5f + 0.5f,
-                        Mathf.Sin(t + Phase240) * 0.5f + 0.5f,
-                        0f
-                    ));
-                }
+            if (_mainEffect!.Enabled.Value && _mainEffect.Mode.Value == ColorMode.Rainbow)
+            {
+                float t = Time.time * _mainEffect.Speed.Value + _mainEffect.Offset.Value;
+                _mainEffect.SetVector(new Vector4(
+                    Mathf.Sin(t) * 0.5f + 0.5f,
+                    Mathf.Sin(t + Phase120) * 0.5f + 0.5f,
+                    Mathf.Sin(t + Phase240) * 0.5f + 0.5f,
+                    0f
+                ));
             }
 
-            // TODO: cull
-            if (_boulderBall!.Mode.Value == ColorMode.Rainbow)
+            if (_particles!.Enabled.Value && _particles.Mode.Value == ColorMode.Rainbow)
+            {
+                float t = Time.time * _particles.Speed.Value + _particles.Offset.Value;
+                _particles.SetVector(new Vector4(
+                    Mathf.Sin(t) * 0.5f + 0.5f,
+                    Mathf.Sin(t + Phase120) * 0.5f + 0.5f,
+                    Mathf.Sin(t + Phase240) * 0.5f + 0.5f,
+                    0f
+                ));
+            }
+
+            if (_boulderBall!.Enabled.Value && _boulderBall.Mode.Value == ColorMode.Rainbow)
             {
                 float t = Time.time * _boulderBall.Speed.Value + _boulderBall.Offset.Value;
                 _boulderBall.SetVector(new Vector4(
@@ -198,10 +211,14 @@ namespace RainbowEffects
             _mainEffect = new Effect("Guard Effect", "rainbowGuard", new Vector3(1f, 0.205078766f, 0f));
             _particles = new Effect("Guard Particles", "rainbowGuard2", new Vector3(1f, 0.205078766f, 0f));
             _boulderBall = new Effect("Fist Bump", "RainbowEffectsBoulderBall", new Vector3(1f, 0.830770f, 0.212231f));
-            _boulderBall.Mode.Description += "\n(These settings also applies to the scoring effect of the ball minigame in the park)";
+            _boulderBall.Mode.Description += "\n(These settings also apply to the scoring effect for the hoop minigame)";
 
             UI.RegisterMelon(this, _mainEffect.Category, _particles.Category, _boulderBall.Category);
         }
+
+        /// <inheritdoc/>
+        public override void OnLateInitializeMelon()
+            => Actions.onMapInitialized += Init;
 
         internal static MelonPreferences_Category CreateCategory(string categoryID, string categoryName)
         {
@@ -229,7 +246,7 @@ namespace RainbowEffects
         internal readonly MelonPreferences_Entry<float> Offset;
         internal readonly MelonPreferences_Entry<Vector3> Color;
         internal readonly MelonPreferences_Entry<ColorMode> Mode;
-        internal RainbowEffectResource? Resource;
+        internal RainbowEffectsResource? Resource;
 
         internal Effect(string name, string property, Vector3 defaultColor)
         {
