@@ -8,7 +8,7 @@
 ## What is this?
 This mod lets you change the colors of the guard shield (and the particles around it) and fistbumps (which also change the scoring effect for the hoop minigame).
 
-Make sure to change the config!
+The config lets you enable/disable features, switch to a static color, and change the rainbow speed.
 
 ## Instructions
 1. Install [MelonLoader](https://github.com/LavaGang/MelonLoader)

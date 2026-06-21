@@ -257,7 +257,7 @@ namespace RainbowEffects
 
             Category = RainbowEffects.CreateCategory(name.Replace(" ", null), name);
 
-            Enabled = RainbowEffects.CreateEntry(Category, nameof(Enabled), false, "Enabled", $"Should {BuildInfo.ProperName} edit this effect?");
+            Enabled = RainbowEffects.CreateEntry(Category, nameof(Enabled), true, "Enabled", $"Should {BuildInfo.ProperName} edit this effect?");
             Enabled.OnEntryValueChanged.Subscribe((_, newValue) =>
             {
                 if (Resource == null) return;
