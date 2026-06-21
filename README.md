@@ -8,6 +8,8 @@
 ## What is this?
 This mod lets you change the colors of the guard shield (and the particles around it) and fistbumps (which also change the scoring effect for the hoop minigame).
 
+Make sure to change the config!
+
 ## Instructions
 1. Install [MelonLoader](https://github.com/LavaGang/MelonLoader)
 2. Install [RumbleModdingAPI](https://thunderstore.io/c/rumble/p/UlvakSkillz/RumbleModdingAPI)
