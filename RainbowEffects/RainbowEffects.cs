@@ -1,12 +1,15 @@
-﻿using MelonLoader;
+﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using MelonLoader;
 using MelonLoader.Preferences;
 using MelonLoader.Utils;
+using RumbleModdingAPI.RMAPI;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using UIFramework;
 using UIFramework.UiExtensions;
 using UnityEngine;
+using UnityEngine.VFX;
 using BuildInfo = RainbowEffects.BuildInfo;
 
 #region Assemblies
@@ -19,7 +22,7 @@ using BuildInfo = RainbowEffects.BuildInfo;
 [assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.IL2CPP)]
 [assembly: VerifyLoaderVersion(BuildInfo.MLVersion, true)]
 [assembly: MelonIncompatibleAssemblies("RainbowGuard")]
-[assembly: UIInfo("Rainbow Effects")]
+[assembly: UIInfo(BuildInfo.ProperName)]
 #endregion
 
 namespace RainbowEffects
@@ -30,6 +33,10 @@ namespace RainbowEffects
     /// </summary>
     public static class BuildInfo
     {
+        /// <summary>
+        /// Mod name with spaces
+        /// </summary>
+        public const string ProperName = "Rainbow Effects";
         /// <summary>
         /// Mod name
         /// </summary>
@@ -57,6 +64,16 @@ namespace RainbowEffects
     }
     #endregion
 
+    internal record RainbowEffectResource(Material Mat, Shader Original, Shader Rainbow)
+    {
+        public RainbowEffectResource(Material mat, Shader rainbow) 
+            : this(mat, mat.shader, rainbow)
+        {}
+
+        internal void SetRainbow() => Mat.shader = Rainbow;
+        internal void SetOriginal() => Mat.shader = Original;
+    }
+
     /// <summary>
     /// The main class
     /// </summary>
@@ -64,11 +81,44 @@ namespace RainbowEffects
     {
         private const float Phase120 = (float)(2d * Math.PI / 3d);
         private const float Phase240 = (float)(4d * Math.PI / 3d);
+        private VisualEffect? _guard;
 
         /// <inheritdoc/>
         public override void OnLateInitializeMelon()
         {
-            AssetBundle assetBundle = RumbleModdingAPI.RMAPI.AssetBundles.LoadAssetBundleFromStream(
+            Actions.onMapInitialized += OnMapInit;
+
+            AssetBundle assetBundle = AssetBundles.LoadAssetBundleFromStream(
+                this,
+                "RainbowEffects.boulderBall"
+            );
+            Shader boulderBall = assetBundle.LoadAsset<Shader>("boulderball.shader");
+            assetBundle.Unload(false);
+
+            boulderBall.hideFlags = HideFlags.HideAndDontSave;
+
+            foreach (Material mat in Resources.FindObjectsOfTypeAll<Material>())
+                if (mat.name == "Hidden/VFX/Boulderball Scored/Reticle Ring/Output Particle Unlit Quad")
+                    mat.shader = boulderBall;
+        }
+
+        private void OnMapInit(string _)
+        {
+            if (_guard != null)
+                return;
+
+            Transform? vfx = Calls.Players.GetLocalPlayerController().transform.Find("Guardstone_VFX");
+            if (vfx == null)
+                return;
+
+            Il2CppReferenceArray<Material> mats = vfx.GetComponent<VFXRenderer>().sharedMaterials;
+            if (mats.Length != 2)
+            {
+                LoggerInstance.Error($"Guardstone's sharedMaterials is malformed (size: {mats.Length})");
+                return;
+            }
+
+            AssetBundle assetBundle = AssetBundles.LoadAssetBundleFromStream(
                 this,
                 "RainbowEffects.rainbowGuard"
             );
@@ -79,59 +129,51 @@ namespace RainbowEffects
             rainbowGuard.hideFlags = HideFlags.HideAndDontSave;
             rainbowGuard2.hideFlags = HideFlags.HideAndDontSave;
 
-            assetBundle = RumbleModdingAPI.RMAPI.AssetBundles.LoadAssetBundleFromStream(
-                this,
-                "RainbowEffects.boulderBall"
-            );
-            Shader boulderBall = assetBundle.LoadAsset<Shader>("boulderball.shader");
-            assetBundle.Unload(false);
+            _mainEffect!.Resource = new RainbowEffectResource(mats[0], rainbowGuard);
+            _particles!.Resource = new RainbowEffectResource(mats[1], rainbowGuard2);
 
-            boulderBall.hideFlags = HideFlags.HideAndDontSave;
+            if (_mainEffect.Enabled.Value)
+                _mainEffect.Resource.SetRainbow();
+            if (_particles.Enabled.Value)
+                _particles.Resource.SetRainbow();
 
-            foreach (Material mat in Resources.FindObjectsOfTypeAll<Material>())
-            {
-                if (mat == null)
-                    continue;
-
-                if (mat.name == "Hidden/VFX/Guardstone VFX/System/Output Particle Shader Graph Quad - Unlit")
-                    mat.shader = rainbowGuard;
-                else if (mat.name == "Hidden/VFX/Guardstone VFX/System (1)/Output Particle Unlit Quad")
-                    mat.shader = rainbowGuard2;
-                else if (mat.name == "Hidden/VFX/Boulderball Scored/Reticle Ring/Output Particle Unlit Quad")
-                    mat.shader = boulderBall;
-            }
+            _guard = vfx.GetComponent<VisualEffect>();
         }
 
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void OnUpdate()
         {
-            if (_mainEffect!.Mode.Value == ColorMode.Rainbow)
+            if (_guard?.aliveParticleCount > 0)
             {
-                float t = Time.time * _mainEffect.Speed.Value + _mainEffect.Offset.Value;
-                _mainEffect.SetShader(new Vector4(
-                    Mathf.Sin(t) * 0.5f + 0.5f,
-                    Mathf.Sin(t + Phase120) * 0.5f + 0.5f,
-                    Mathf.Sin(t + Phase240) * 0.5f + 0.5f,
-                    0f
-                ));
+                if (_mainEffect!.Enabled.Value && _mainEffect.Mode.Value == ColorMode.Rainbow)
+                {
+                    float t = Time.time * _mainEffect.Speed.Value + _mainEffect.Offset.Value;
+                    _mainEffect.SetVector(new Vector4(
+                        Mathf.Sin(t) * 0.5f + 0.5f,
+                        Mathf.Sin(t + Phase120) * 0.5f + 0.5f,
+                        Mathf.Sin(t + Phase240) * 0.5f + 0.5f,
+                        0f
+                    ));
+                }
+
+                if (_particles!.Enabled.Value && _particles.Mode.Value == ColorMode.Rainbow)
+                {
+                    float t = Time.time * _particles.Speed.Value + _particles.Offset.Value;
+                    _particles.SetVector(new Vector4(
+                        Mathf.Sin(t) * 0.5f + 0.5f,
+                        Mathf.Sin(t + Phase120) * 0.5f + 0.5f,
+                        Mathf.Sin(t + Phase240) * 0.5f + 0.5f,
+                        0f
+                    ));
+                }
             }
 
-            if (_particles!.Mode.Value == ColorMode.Rainbow)
-            {
-                float t = Time.time * _particles.Speed.Value + _particles.Offset.Value;
-                _particles.SetShader(new Vector4(
-                    Mathf.Sin(t) * 0.5f + 0.5f,
-                    Mathf.Sin(t + Phase120) * 0.5f + 0.5f,
-                    Mathf.Sin(t + Phase240) * 0.5f + 0.5f,
-                    0f
-                ));
-            }
-
+            // TODO: cull
             if (_boulderBall!.Mode.Value == ColorMode.Rainbow)
             {
                 float t = Time.time * _boulderBall.Speed.Value + _boulderBall.Offset.Value;
-                _boulderBall.SetShader(new Vector4(
+                _boulderBall.SetVector(new Vector4(
                     Mathf.Sin(t) * 0.5f + 0.5f,
                     Mathf.Sin(t + Phase120) * 0.5f + 0.5f,
                     Mathf.Sin(t + Phase240) * 0.5f + 0.5f,
@@ -182,10 +224,12 @@ namespace RainbowEffects
     {
         private readonly int _shaderID;
         internal readonly MelonPreferences_Category Category;
+        internal readonly MelonPreferences_Entry<bool> Enabled;
         internal readonly MelonPreferences_Entry<float> Speed;
         internal readonly MelonPreferences_Entry<float> Offset;
         internal readonly MelonPreferences_Entry<Vector3> Color;
         internal readonly MelonPreferences_Entry<ColorMode> Mode;
+        internal RainbowEffectResource? Resource;
 
         internal Effect(string name, string property, Vector3 defaultColor)
         {
@@ -196,26 +240,39 @@ namespace RainbowEffects
 
             Category = RainbowEffects.CreateCategory(name.Replace(" ", null), name);
 
+            Enabled = RainbowEffects.CreateEntry(Category, nameof(Enabled), false, "Enabled", $"Should {BuildInfo.ProperName} edit this effect?");
+            Enabled.OnEntryValueChanged.Subscribe((_, newValue) =>
+            {
+                if (Resource == null) return;
+
+                if (newValue)
+                    Resource.SetRainbow();
+                else
+                    Resource.SetOriginal();
+            });
+
             Speed = RainbowEffects.CreateEntry(Category, nameof(Speed), 1f, "Speed", "Speed of the rainbow");
             Offset = RainbowEffects.CreateEntry(Category, nameof(Offset), 0f, "Offset", "Offset of the rainbow");
 
             Color = RainbowEffects.CreateEntry(Category, nameof(Color), defaultColor, "Color", "The color of the " + lowName, new VectorRange(0f, 1f));
             Color.OnEntryValueChanged.Subscribe((_, newColor) =>
-                SetShader(newColor)
+                SetVector(newColor)
             );
 
             Mode = RainbowEffects.CreateEntry(Category, nameof(Mode), ColorMode.Rainbow, "Mode", "The color mode of the " + lowName, new UserEditNotifier { OnUserEdit = ModeToggled });
-            Mode.OnEntryValueChanged.Subscribe((_, newMode) => {
+            Mode.OnEntryValueChanged.Subscribe((_, newMode) =>
+            {
                 if (newMode == ColorMode.Static)
-                    SetShader(Color.Value);
+                    SetVector(Color.Value);
             });
             ModeToggled(Mode.Value);
 
             if (Mode.Value == ColorMode.Static)
-                SetShader(Color.Value);
+                SetVector(Color.Value);
         }
-        
-        internal void SetShader(Vector4 v)
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void SetVector(Vector4 v)
             => Shader.SetGlobalVector(_shaderID, v);
 
         private void ModeToggled(object newValue)

@@ -87,6 +87,9 @@
 		<Reference Include="Il2Cppmscorlib">
 			<HintPath>$(LibsDirPath)\MelonLoader\Il2CppAssemblies\Il2Cppmscorlib.dll</HintPath>
 		</Reference>
+		<Reference Include="Il2CppRUMBLE.Runtime">
+			<HintPath>$(LibsDirPath)\MelonLoader\Il2CppAssemblies\Il2CppRUMBLE.Runtime.dll</HintPath>
+		</Reference>
 		<Reference Include="MelonLoader">
 			<HintPath>$(LibsDirPath)\MelonLoader\net6\MelonLoader.dll</HintPath>
 		</Reference>
@@ -101,6 +104,9 @@
 		</Reference>
 		<Reference Include="UnityEngine.CoreModule">
 		    <HintPath>$(LibsDirPath)\MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.VFXModule">
+			<HintPath>$(LibsDirPath)\MelonLoader\Il2CppAssemblies\UnityEngine.VFXModule.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
